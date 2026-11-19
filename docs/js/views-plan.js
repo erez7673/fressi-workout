@@ -1,7 +1,7 @@
 // My Plan, day preview, active workout and summary screens.
 import { state, profile, exById, photoFor, isAvailable, touchProfile, save, lastLogFor } from './store.js';
 import { esc, icon, thumb, register, sheet, closeSheet, toast, fmtClock, fmtKg, fmtDate, fmtDur, setLabel, themeButton } from './ui.js';
-import { currentWeek, planProgress, dayFocus, phaseOf, buildSession, estimateMinutes, estimateCalories, swapOptions, generatePlan, editKey, AREAS, setDayAreas, EX_PER_DAY, warmOptions, warmPref } from './planner.js';
+import { currentWeek, planProgress, dayFocus, phaseOf, buildSession, estimateMinutes, estimateCalories, swapOptions, generatePlan, editKey, AREAS, setDayAreas, exPerDay, warmOptions, warmPref } from './planner.js';
 import { MUSCLES, PATTERN_NAMES } from './exercises.js';
 import * as W from './workout.js';
 import { rerender } from './app.js';
@@ -68,7 +68,7 @@ register({
     sheet(`<h2>${esc(plan.name)}</h2>
       <p class="muted">${plan.weeks} weeks · ${plan.days.length} days per week · ${p.stats.minutes} min sessions</p>
       <ul class="plain">
-        <li><b>Every day:</b> 4 exercises × 4 sets, plus warm-up${p.stats.cardio ? ', cardio finisher' : ''} and cooldown. Open a day to choose its muscle areas or change the warm-up.</li>
+        <li><b>Every day:</b> ${exPerDay(p.stats)} exercise${exPerDay(p.stats) > 1 ? 's' : ''} × 4 sets, plus warm-up${p.stats.cardio ? ', cardio finisher' : ''} and cooldown. Open a day to choose its muscle areas or change the warm-up.</li>
         <li><b>Weeks 1–4:</b> learn the movements, find your working weights.</li>
         <li><b>Weeks 5–8:</b> more reps per set.</li>
         <li><b>Weeks 9–11:</b> ${['strength', 'hypertrophy'].includes(p.stats.goal) ? 'heavier with fewer reps' : 'keep building reps and weight'}.</li>
@@ -165,7 +165,7 @@ function openAreas(d) {
   const day = profile().plan.days[d];
   areaSel ||= [...(day.muscles || [])];
   sheet(`<h2>${esc(day.name)}: muscle areas</h2>
-    <p class="muted small">Pick one or more. The app chooses ${EX_PER_DAY} exercises for them from the equipment in your gym. You can still swap or remove single exercises afterwards.</p>
+    <p class="muted small">Pick one or more. The app chooses ${exPerDay(profile().stats)} exercise(s) for them (set the number under Profile → Edit) from the equipment in your gym. You can still swap or remove single exercises afterwards.</p>
     <div class="choices grid">${Object.entries(AREAS).map(([k, a]) => `<button class="choice ${areaSel.includes(k) ? 'on' : ''}" data-act="areas-toggle" data-d="${d}" data-k="${k}">${esc(a.name)}</button>`).join('')}</div>
     <button class="btn primary" data-act="areas-save" data-d="${d}" ${areaSel.length ? '' : 'disabled'}>Pick exercises for these areas</button>
     ${day.muscles?.length ? `<button class="btn ghost" data-act="areas-clear" data-d="${d}">Let the app choose the areas</button>` : ''}`);

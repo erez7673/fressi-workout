@@ -158,6 +158,9 @@ button.chips.editable { background: none; border: 0; padding: 0; font: inherit; 
 .chip.edit { display: inline-flex; align-items: center; gap: 4px; color: var(--blue); border-color: var(--blue); border-style: dashed; }
 .chip.edit svg { width: 14px; height: 14px; }
 button.chips.lead-chips { margin: 0 0 14px; }
+.dayareas { display: grid; gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.dayareas:last-child { border-bottom: 0; }
+.dayareas[hidden] { display: none; }
 .cardio-card .iconbtn svg { width: 20px; height: 20px; color: var(--blue); }
 .stepper { display: flex; align-items: center; gap: 10px; }
 .stepper input { width: 80px; text-align: center; }

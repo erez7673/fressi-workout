@@ -1,7 +1,7 @@
 // Onboarding / edit profile, Profile & settings, Progress screens.
 import { state, profile, profileList, createProfile, touchProfile, save, replaceState, exById, today } from './store.js';
 import { esc, icon, register, toast, fmtDate, fmtKg, sheet, closeSheet, setTheme } from './ui.js';
-import { GOALS, LEVELS, FOCUS, generatePlan } from './planner.js';
+import { GOALS, LEVELS, FOCUS, generatePlan, AREAS, areasFor, dayName, exPerDay, setDayAreas, fitDay } from './planner.js';
 import { INJURIES, MUSCLES } from './exercises.js';
 import { lineChart, barChart } from './charts.js';
 import { syncNow, syncEnabled, scheduleSync } from './sync.js';
@@ -13,7 +13,7 @@ const COLORS = ['#2f7cf6', '#e84d8a', '#12a37f', '#f08a24', '#8b5cf6'];
 export function onboardView(edit) {
   const p = edit ? profile() : null;
   const s = p?.stats || { sex: 'female', level: 'beginner', goal: 'hypertrophy', days: 3, minutes: 45, warmup: 5, cardio: true, injuries: [], focus: [] };
-  const radio = (name, map, val) => `<div class="seg-ctl">${Object.entries(map).map(([k, v]) => `<label><input type="radio" name="${name}" value="${k}" ${String(val) === String(k) ? 'checked' : ''}><span>${esc(v)}</span></label>`).join('')}</div>`;
+  const radio = (name, map, val, attrs = '') => `<div class="seg-ctl">${Object.entries(map).map(([k, v]) => `<label><input type="radio" name="${name}" value="${k}" ${String(val) === String(k) ? 'checked' : ''} ${attrs}><span>${esc(v)}</span></label>`).join('')}</div>`;
   const checks = (name, map, vals) => `<div class="chipwrap">${Object.entries(map).map(([k, v]) => `<label class="chk"><input type="checkbox" name="${name}" value="${k}" ${vals.includes(k) ? 'checked' : ''}><span>${esc(typeof v === 'string' ? v : v.name)}</span></label>`).join('')}</div>`;
   const first = !profileList().length;
   return {
@@ -30,7 +30,11 @@ export function onboardView(edit) {
         </div>
         <div class="field"><span>Experience</span>${radio('level', LEVELS, s.level)}</div>
         <div class="field"><span>Main goal</span>${radio('goal', Object.fromEntries(Object.entries(GOALS).map(([k, v]) => [k, v.name])), s.goal)}</div>
-        <div class="field"><span>Training days per week</span>${radio('days', { 2: '2', 3: '3', 4: '4', 5: '5' }, s.days)}</div>
+        <div class="field"><span>Training days per week</span>${radio('days', { 2: '2', 3: '3', 4: '4', 5: '5' }, s.days, 'data-change="pf-days"')}</div>
+        <div class="field"><span>Exercises per workout day <small>(4 sets each, plus warm-up and cooldown)</small></span>${radio('exPerDay', { 1: '1', 2: '2', 3: '3', 4: '4' }, exPerDay(s))}</div>
+        <div class="field"><span>Muscle areas per workout day <small>(leave a day empty and the app chooses)</small></span>
+          ${[0, 1, 2, 3, 4].map(i => `<div class="dayareas" data-day="${i}" ${i >= s.days ? 'hidden' : ''}><b>${dayName(i)}</b>${checks('areas' + i, AREAS, p ? areasFor(p, i) : [])}</div>`).join('')}
+        </div>
         <div class="field"><span>Session length</span>${radio('minutes', { 30: '30 min', 45: '45 min', 60: '60 min', 75: '75 min' }, s.minutes)}</div>
         <div class="field"><span>Warm-up</span>${radio('warmup', { 0: 'None', 3: '3 min', 5: '5 min', 8: '8 min' }, s.warmup)}</div>
         <label class="toggle-line"><input type="checkbox" name="cardio" ${s.cardio ? 'checked' : ''}> Add a cardio finisher (treadmill, elliptical, stairs, bike)</label>
@@ -55,11 +59,25 @@ function readForm() {
       level: fd.get('level'), goal: fd.get('goal'), days: +fd.get('days'), minutes: +fd.get('minutes'),
       warmup: +fd.get('warmup'), cardio: fd.get('cardio') === 'on',
       injuries: fd.getAll('injuries'), focus: fd.getAll('focus'),
+      exPerDay: +fd.get('exPerDay') || 4,
+      dayAreas: Array.from({ length: +fd.get('days') }, (_, i) => fd.getAll('areas' + i)),
     },
   };
 }
 
+// After saving without a rebuild: apply changed muscle areas, then give every day the chosen number of exercises.
+function applyDayChanges(p, oldAreas) {
+  if (!p.plan) return;
+  p.plan.days.forEach((day, d) => {
+    const want = p.stats.dayAreas?.[d] || [];
+    if (want.join() !== (oldAreas[d] || []).join()) setDayAreas(p, d, want);
+    else fitDay(p, d);
+  });
+}
+
 register({
+  // Show a muscle-area row for each training day.
+  'pf-days': (el) => document.querySelectorAll('.dayareas').forEach(r => { r.hidden = +r.dataset.day >= +el.value; }),
   'create-profile': () => {
     const d = readForm(); if (!d) return;
     d.stats.likes = []; d.stats.dislikes = [];
@@ -74,12 +92,12 @@ register({
     const p = profile();
     p.name = d.name;
     const oldW = p.stats.weight;
+    if (el.dataset.rebuild && p.plan && Object.keys(p.plan.done).length && !confirm('Rebuilding restarts your plan at week 1 (history is kept). Continue?')) return;
+    const oldAreas = (p.plan?.days || []).map((_, i) => areasFor(p, i));
     p.stats = { ...p.stats, ...d.stats };
     if (d.stats.weight !== oldW) p.bodyweight.push({ date: today(), kg: d.stats.weight });
-    if (el.dataset.rebuild) {
-      if (p.plan && Object.keys(p.plan.done).length && !confirm('Rebuilding restarts your plan at week 1 (history is kept). Continue?')) return;
-      p.plan = generatePlan(p);
-    }
+    if (el.dataset.rebuild) p.plan = generatePlan(p);
+    else applyDayChanges(p, oldAreas);
     touchProfile(p); scheduleSync();
     toast('Saved'); location.hash = el.dataset.rebuild ? '#/plan' : '#/profile';
   },

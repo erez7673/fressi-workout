@@ -3,7 +3,8 @@ import { MUSCLES, WARMUP, COOLDOWN } from './exercises.js';
 import { allExercises, isAvailable, exById, lastLogFor, uid } from './store.js';
 
 export const PLAN_WEEKS = 12;
-export const EX_PER_DAY = 4;   // exercises per workout day (not counting warm-up and cardio finisher)
+export const EX_PER_DAY = 4;   // default exercises per workout day (not counting warm-up and cardio finisher)
+export const exPerDay = (st) => Math.max(1, Math.min(EX_PER_DAY, st?.exPerDay || EX_PER_DAY)); // the profile's choice, 1–4
 export const SETS = 4;         // sets per exercise
 const PLAN_FMT = 3;            // bump when the plan shape changes (see upgradePlan)
 
@@ -144,23 +145,9 @@ export function generatePlan(p) {
   const rand = rng(p.id + st.goal + st.days + (p.plan?.version || 0));
 
   const days = split.days.map((key, di) => {
-    const t = DAYS[key];
-    const muscles = p.plan?.days?.[di]?.muscles; // muscle areas the user picked for this day are kept on rebuild
-    let items;
-    if (muscles?.length) items = itemsForAreas(st, muscles, rand, used);
-    else {
-      let slots = [...t.slots];
-      // Insert focus slots after the first two big lifts.
-      const extra = focusPats.filter(fp => regionAllows(t.region, fp));
-      slots.splice(2, 0, ...extra);
-      // Exactly EX_PER_DAY exercises (warm-up and cardio finisher come on top).
-      items = [];
-      for (const pat of slots) {
-        if (items.length >= EX_PER_DAY) break;
-        const ex = pick(st, pat, { exclude: items.map(i => i.exId), used, rand, compoundFirst: items.length < 2 });
-        if (ex) items.push({ exId: ex.id, pat });
-      }
-    }
+    // Muscle areas the user picked for this day (profile first, older plans kept them on the day).
+    const muscles = areasFor(p, di);
+    const items = muscles.length ? itemsForAreas(st, muscles, rand, used) : autoItems(st, key, focusPats, rand, used);
     let cardio = null;
     if (budget.cardio) {
       const c = pick(st, 'cardio', { exclude: [], used, rand });
@@ -181,14 +168,36 @@ export function generatePlan(p) {
   };
 }
 
-// EX_PER_DAY exercises for the chosen muscle areas, taking one from each area in turn.
+// The muscle areas chosen for workout day di (empty = the app chooses).
+export function areasFor(p, di) {
+  const a = p.stats.dayAreas?.[di] ?? p.plan?.days?.[di]?.muscles ?? [];
+  return a.filter(k => AREAS[k]);
+}
+
+// Default exercises for a day of the split (the day's slots plus the profile's extra focus).
+function autoItems(st, key, focusPats, rand, used, keep = []) {
+  const t = DAYS[key] || DAYS.fullA;
+  const slots = [...t.slots];
+  // Insert focus slots after the first two big lifts.
+  slots.splice(2, 0, ...focusPats.filter(fp => regionAllows(t.region, fp)));
+  const items = [...keep];
+  for (const pat of slots) {
+    if (items.length >= exPerDay(st)) break;
+    const ex = pick(st, pat, { exclude: items.map(i => i.exId), used, rand, compoundFirst: items.length < 2 });
+    if (ex) items.push({ exId: ex.id, pat });
+  }
+  return items;
+}
+
+// Exercises for the chosen muscle areas, taking one from each area in turn.
 // e.g. chest + biceps → chest press, curl, chest fly, curl.
-function itemsForAreas(st, areas, rand, used) {
+function itemsForAreas(st, areas, rand, used, keep = []) {
+  const n = exPerDay(st);
   const queues = areas.map(a => [...(AREAS[a]?.pats || [])]);
-  const items = [];
-  while (items.length < EX_PER_DAY && queues.some(q => q.length)) {
+  const items = [...keep];
+  while (items.length < n && queues.some(q => q.length)) {
     for (const q of queues) {
-      if (items.length >= EX_PER_DAY) break;
+      if (items.length >= n) break;
       const pat = q.shift();
       if (!pat) continue;
       const ex = pick(st, pat, { exclude: items.map(i => i.exId), used, rand, compoundFirst: items.length < 2 });
@@ -198,17 +207,38 @@ function itemsForAreas(st, areas, rand, used) {
   return items;
 }
 
-// New exercises for one day after the user picks its muscle areas.
-export function setDayAreas(p, dayIdx, areas) {
-  const day = p.plan.days[dayIdx];
+const usedElsewhere = (p, dayIdx) => {
   const used = new Map();
   p.plan.days.forEach((d, i) => { if (i !== dayIdx) d.items.forEach(it => used.set(it.exId, (used.get(it.exId) || 0) + 1)); });
+  return used;
+};
+
+// Sets the muscle areas of one day (saved in the profile) and picks new exercises for them.
+// An empty list means the app chooses again; the day's current exercises are kept.
+export function setDayAreas(p, dayIdx, areas) {
+  const day = p.plan.days[dayIdx];
+  p.stats.dayAreas ||= [];
+  p.stats.dayAreas[dayIdx] = [...areas];
   if (areas.length) {
     day.muscles = [...areas];
-    day.items = itemsForAreas(p.stats, areas, rng(p.id + areas.join() + Date.now()), used);
+    day.items = itemsForAreas(p.stats, areas, rng(p.id + areas.join() + Date.now()), usedElsewhere(p, dayIdx));
   } else {
     delete day.muscles;
   }
+  fitDay(p, dayIdx);
+}
+
+// Makes a day have exactly the profile's number of exercises: extra ones are dropped, missing ones are added.
+export function fitDay(p, dayIdx) {
+  const day = p.plan.days[dayIdx];
+  const n = exPerDay(p.stats);
+  if (day.items.length > n) { day.items = day.items.slice(0, n); return; }
+  if (day.items.length === n) return;
+  const rand = rng(p.id + dayIdx + Date.now());
+  const used = usedElsewhere(p, dayIdx);
+  const areas = day.muscles || [];
+  day.items = areas.length ? itemsForAreas(p.stats, areas, rand, used, day.items)
+    : autoItems(p.stats, day.key, (p.stats.focus || []).flatMap(f => FOCUS[f]?.pats || []), rand, used, day.items);
 }
 
 // Plans made by older versions are moved to the current format; progress (done weeks) and history are kept.

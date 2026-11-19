@@ -6,7 +6,7 @@ import { EQUIPMENT, EQUIP_CATS } from './equipment.js';
 import { POSITIONS, GRIPS, FEEL, matchExercises, customExercise, identifyWithAI } from './identify.js';
 import { lineChart } from './charts.js';
 import { EQUIP_PIC } from './pictures.js';
-import { generatePlan, dayFocus, sessionBudget, warmPref } from './planner.js';
+import { generatePlan, dayFocus, sessionBudget, warmPref, exPerDay } from './planner.js';
 import { rerender } from './app.js';
 import { scheduleSync } from './sync.js';
 
@@ -102,8 +102,9 @@ function addToDaySheet(ex) {
     <p class="muted small">${esc(ex.name)}${cardio ? ' – as the cardio finisher of:' : ' – added to every week of:'}</p>
     ${p.plan.days.map((day, d) => {
       const has = cardio ? day.cardio?.exId === ex.id : day.items.some(it => it.exId === ex.id);
+      const full = !cardio && day.items.length >= exPerDay(p.stats);
       return `<button class="row" data-act="add-to-day-pick" data-id="${ex.id}" data-d="${d}" ${has ? 'disabled' : ''}>
-        <span><b>${esc(day.name)}</b><small>${esc(dayFocus(day))}</small></span>${has ? '<span class="pill">Already in it</span>' : icon.plus}</button>`;
+        <span><b>${esc(day.name)}</b><small>${esc(dayFocus(day))}${full && !has ? ` · full (${day.items.length} of ${exPerDay(p.stats)}) – tap to replace one` : ''}</small></span>${has ? '<span class="pill">Already in it</span>' : full ? icon.swap : icon.plus}</button>`;
     }).join('')}
     ${cardio ? `<button class="row" data-act="add-to-warm" data-id="${ex.id}"><span><b>Use as my warm-up</b><small>All workout days</small></span>${icon.plus}</button>` : ''}
     <button class="btn ghost" data-act="sheet-close">Cancel</button>`);
@@ -116,11 +117,24 @@ register({
     if (ex.pat === 'cardio') {
       day.cardio = { exId: ex.id, min: day.cardio?.min || sessionBudget(p.stats).cardio || 10 };
       toast(`Cardio finisher of ${day.name}`);
+    } else if (day.items.length >= exPerDay(p.stats)) {
+      // The day already has the number of exercises set in the profile: choose one to replace.
+      sheet(`<h2>${esc(day.name)} is full</h2>
+        <p class="muted small">It has ${day.items.length} of ${exPerDay(p.stats)} exercises (set under Profile → Edit). Replace one with ${esc(ex.name)}:</p>
+        ${day.items.map((it, i) => { const o = exById(it.exId); return o ? `<button class="row" data-act="add-to-day-replace" data-id="${ex.id}" data-d="${el.dataset.d}" data-i="${i}">${thumb(o, photoFor(o.id), 'sm')}<span><b>${esc(o.name)}</b><small>${esc(MUSCLES[o.m])}</small></span>${icon.swap}</button>` : ''; }).join('')}
+        <button class="btn ghost" data-act="sheet-close">Cancel</button>`);
+      return;
     } else {
       day.items.push({ exId: ex.id, pat: ex.pat });
-      toast(`Added to ${day.name} (${day.items.length} exercises)`);
+      toast(`Added to ${day.name} (${day.items.length} of ${exPerDay(p.stats)})`);
     }
     touchProfile(p); scheduleSync(); closeSheet(); rerender();
+  },
+  'add-to-day-replace': (el) => {
+    const p = profile(); const ex = exById(el.dataset.id); const day = p.plan.days[+el.dataset.d];
+    day.items[+el.dataset.i] = { exId: ex.id, pat: ex.pat };
+    touchProfile(p); scheduleSync(); closeSheet(); rerender();
+    toast(`${ex.name} is now in ${day.name}`);
   },
   'add-to-warm': (el) => {
     const p = profile();
