@@ -2,6 +2,7 @@
   "name": "Fressi Workout",
   "short_name": "Fressi",
   "description": "Personal workout plans, timers and machine guide for Fressi Jätkäsaari.",
+  "id": "./",
   "start_url": "./#/plan",
   "scope": "./",
   "display": "standalone",
@@ -9,8 +10,8 @@
   "background_color": "#f4f4f5",
   "theme_color": "#f4f4f5",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
