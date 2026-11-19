@@ -5,10 +5,17 @@ import { MUSCLES, MOTIONS, PATTERN_NAMES, TEMPLATES } from './exercises.js';
 import { EQUIPMENT, EQUIP_CATS } from './equipment.js';
 import { POSITIONS, GRIPS, FEEL, matchExercises, customExercise, identifyWithAI } from './identify.js';
 import { lineChart } from './charts.js';
+import { EQUIP_PIC } from './pictures.js';
 import { generatePlan } from './planner.js';
 import { rerender } from './app.js';
 import { scheduleSync } from './sync.js';
 
+const eqThumb = (id) => {
+  const pic = EQUIP_PIC[id];
+  return pic
+    ? `<span class="thumb pic sm"><img src="${pic.url}" alt="gym80 ${esc(pic.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></span>`
+    : `<span class="thumb sm"><span class="ico">${icon.gym}</span></span>`;
+};
 const eqName = (id) => EQUIPMENT.find(e => e.id === id)?.name || state.gym.machines.find(m => m.id === id)?.name || id;
 const eqText = (eq) => eq === 'none' ? 'No equipment' : eq.split('|').map(alt => alt.split('+').map(eqName).join(' + ')).join('  or  ');
 
@@ -108,7 +115,7 @@ export function gymView() {
           <button class="iconbtn" data-act="machine-menu" data-id="${m.id}">${icon.dots}</button></div>`;
       }).join('')}</div>` : ''}
       ${EQUIP_CATS.map(cat => `<h3>${esc(cat)}</h3><div class="card list">${EQUIPMENT.filter(e => e.cat === cat).map(e => `
-        <label class="eqrow"><span>${esc(e.name)}${e.seen ? '' : ' <span class="pill warnpill">confirm</span>'}</span>
+        <label class="eqrow"><span class="eqname">${eqThumb(e.id)}<span>${esc(e.name)}${e.seen ? '' : ' <span class="pill warnpill">confirm</span>'}</span></span>
         <input type="checkbox" class="switch" ${eqOn(e.id) ? 'checked' : ''} data-change="eq-toggle" data-id="${e.id}"></label>`).join('')}</div>`).join('')}
       <div class="card"><p><b>Changed the equipment?</b> Rebuild your plan so it only uses what's on.</p><button class="btn" data-act="rebuild-plan">Rebuild my plan</button></div>`,
   };

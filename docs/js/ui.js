@@ -1,5 +1,6 @@
 // Small UI helpers: escaping, icons, toasts, bottom sheets, action registry, light/dark theme.
 import { state, save } from './store.js';
+import { picFor } from './pictures.js';
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export const $ = (sel, root = document) => root.querySelector(sel);
@@ -30,19 +31,15 @@ export const icon = {
   search: P('<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>'),
 };
 
-// Exercise thumbnail: user photo if any, otherwise a coloured tile with a muscle glyph.
-const GLYPH = {
-  chest: '🫁', back: '🔙', shoulders: '🏔️', 'rear-delts': '🎯', traps: '⛰️', biceps: '💪', triceps: '🦾',
-  quads: '🦵', hamstrings: '🦿', glutes: '🍑', adductors: '🦵', calves: '🦶', core: '🧱', cardio: '❤️', forearms: '✊',
-};
-const HUE = {
-  chest: 210, back: 160, shoulders: 260, 'rear-delts': 280, traps: 300, biceps: 20, triceps: 35,
-  quads: 120, hamstrings: 100, glutes: 340, adductors: 80, calves: 60, core: 190, cardio: 0, forearms: 45,
-};
+// Exercise thumbnail: the user's own photo if any, otherwise the gym80 picture of the equipment.
+// Cardio (Matrix machines) and offline-without-cache fall back to a plain line icon.
+const CARDIO_ICON = P('<path d="M3 12h4l2-5 4 10 2-5h6"/>');
 export function thumb(ex, photo, size = 'md') {
   if (photo) return `<div class="thumb ${size}"><img src="${photo}" alt=""></div>`;
-  const m = ex?.m || 'core';
-  return `<div class="thumb ${size}" style="--h:${HUE[m] ?? 200}"><span>${GLYPH[m] || '🏋️'}</span></div>`;
+  const fallback = `<span class="ico">${ex?.m === 'cardio' ? CARDIO_ICON : icon.gym}</span>`;
+  const pic = picFor(ex);
+  if (!pic) return `<div class="thumb ${size}">${fallback}</div>`;
+  return `<div class="thumb pic ${size}">${fallback}<img src="${pic.url}" alt="gym80 ${esc(pic.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></div>`;
 }
 
 let toastTimer;
