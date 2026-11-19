@@ -2,6 +2,7 @@
 
 A personal workout app (installable web app) for Android and iPhone, built for Fressi Jätkäsaari, Helsinki.
 
+- Ready-made beginner plans for women 50+ (2 or 3 full-body days, 6 exercises, 2–3 sets of 10–15 reps), fully editable per day
 - 12-week plans built from your stats, goal, schedule, injuries and focus areas: 4 exercises × 4 sets per day, plus warm-up, optional cardio finisher and cooldown
 - Tap the sets on a day to change reps or kg before you start
 - Pick the muscle areas of each workout day (e.g. Workout Day A: chest + biceps) and the app chooses the exercises

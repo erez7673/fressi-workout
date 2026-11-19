@@ -5,6 +5,8 @@ import { allExercises, isAvailable, exById, lastLogFor, uid } from './store.js';
 export const PLAN_WEEKS = 12;
 export const EX_PER_DAY = 4;   // default exercises per workout day (not counting warm-up and cardio finisher)
 export const exPerDay = (st) => Math.max(1, Math.min(EX_PER_DAY, st?.exPerDay || EX_PER_DAY)); // the profile's choice, 1–4
+// Exercises per day for this profile's plan: ready-made plans have their own number (see TEMPLATES).
+export const dayCap = (p) => TEMPLATES[p.plan?.template]?.perDay || exPerDay(p.stats);
 export const SETS = 4;         // sets per exercise
 const PLAN_FMT = 3;            // bump when the plan shape changes (see upgradePlan)
 
@@ -30,6 +32,75 @@ export const GOALS = {
   fatloss: { name: 'Lose fat / tone', compound: { sets: 3, reps: [10, 12], rest: 60 }, iso: { sets: 3, reps: [12, 15], rest: 45 }, cardio: 15, factor: 0.85 },
   general: { name: 'General fitness', compound: { sets: 3, reps: [8, 12], rest: 75 }, iso: { sets: 2, reps: [10, 15], rest: 60 }, cardio: 10, factor: 0.9 },
 };
+
+// ── Ready-made plans ──
+// Fixed full-body plans for women starting out around 50+: machines first, 6 exercises a day,
+// 2–3 sets of 10–15 reps, light start and slow progression. Each slot lists exercises in order of
+// preference; the first one that is on in Gym Setup (and safe for the profile's injuries) is used.
+const TPL_DAYS = {
+  fullA: [['leg-press', 'goblet-squat', 'smith-squat'], ['machine-chest-press', 'plate-chest-press', 'db-bench', 'pushup'],
+    ['machine-row', 'seated-cable-row', 'plate-row', 'db-row'], ['glute-bridge', 'hip-thrust-machine'], ['db-lateral', 'cable-lateral'], ['plank', 'dead-bug']],
+  fullB: [['goblet-squat', 'leg-press', 'sumo-squat'], ['lat-pulldown', 'close-pulldown', 'assisted-chin'],
+    ['machine-shoulder-press', 'db-shoulder-press', 'smith-ohp'], ['db-rdl', 'back-ext', 'cable-pull-through'], ['leg-curl'], ['side-plank', 'dead-bug']],
+  fullC: [['stepup', 'reverse-lunge', 'split-squat'], ['db-bench', 'machine-chest-press', 'pushup'],
+    ['seated-cable-row', 'machine-row', 'db-row'], ['back-ext', 'glute-bridge'], ['abductor', 'cable-kickback'], ['dead-bug', 'plank']],
+};
+
+export const TEMPLATES = {
+  starter: { name: 'Gentle start · 2 days a week', short: '2 days a week', days: ['fullA', 'fullB'], perDay: 6,
+    blurb: 'The softest way in: two full-body days with a rest day or two between. Move up to 3 days when it feels easy.' },
+  steady: { name: 'Beginner full body · 3 days a week', short: '3 days a week', days: ['fullA', 'fullB', 'fullC'], perDay: 6,
+    blurb: 'Three full-body days (for example Mon, Wed, Fri). Every muscle group is trained twice or more a week.' },
+};
+
+// Sets, reps and rest per phase of a ready-made plan (bodyweight holds: seconds instead of reps).
+const TPL_RX = {
+  base: { sets: 2, reps: [12, 15], rest: 60, hold: [20, 30] },
+  build: { sets: 3, reps: [10, 12], rest: 60, hold: [25, 40] },
+  peak: { sets: 3, reps: [8, 10], rest: 75, hold: [30, 45] },
+  deload: { sets: 2, reps: [10, 12], rest: 60, hold: [20, 30] },
+};
+
+// A short human summary of a ready-made plan's phases, for the info sheets.
+export const TPL_PHASES = [
+  ['Weeks 1–4', '2 sets × 12–15 reps, light weights. Learn the movements.'],
+  ['Weeks 5–8', '3 sets × 10–12 reps. A bit more weight when all reps feel good.'],
+  ['Weeks 9–11', '3 sets × 8–10 reps, heavier. Stay in control.'],
+  ['Week 12', '2 sets × 10–12 reps, lighter. Recover.'],
+];
+
+export const templateExNames = (key, di) => TPL_DAYS[TEMPLATES[key].days[di]].map(alts => exById(alts[0])?.name).filter(Boolean);
+
+function resolveSlot(st, ids, taken) {
+  const inj = st.injuries || [], no = st.dislikes || [];
+  for (const id of ids) {
+    const e = exById(id);
+    if (e && isAvailable(e) && !taken.includes(id) && !no.includes(id) && !e.avoid.some(a => inj.includes(a))) return e;
+  }
+  const pat = exById(ids[0])?.pat;
+  return pat ? candidates({ ...st, level: 'beginner' }, pat, taken)[0] || null : null;
+}
+
+export function generateTemplatePlan(p, key) {
+  const tpl = TEMPLATES[key], st = p.stats;
+  const days = tpl.days.map((dk, di) => {
+    const items = [];
+    for (const alts of TPL_DAYS[dk]) {
+      const ex = resolveSlot(st, alts, items.map(i => i.exId));
+      if (ex) items.push({ exId: ex.id, pat: ex.pat });
+    }
+    let cardio = null;
+    if (st.cardio) {
+      const c = resolveSlot(st, ['incline-walk', 'elliptical', 'bike'], []);
+      if (c) cardio = { exId: c.id, min: 8 };
+    }
+    return { key: dk, name: dayName(di), items, cardio };
+  });
+  return {
+    id: uid('plan'), version: (p.plan?.version || 0) + 1, createdAt: Date.now(), fmt: PLAN_FMT,
+    name: tpl.name, weeks: PLAN_WEEKS, goal: 'general', days, done: {}, restScale: 1, edits: {}, template: key,
+  };
+}
 
 export const LEVELS = { beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced' };
 const LEVEL_NUM = { beginner: 1, intermediate: 2, advanced: 3 };
@@ -175,14 +246,14 @@ export function areasFor(p, di) {
 }
 
 // Default exercises for a day of the split (the day's slots plus the profile's extra focus).
-function autoItems(st, key, focusPats, rand, used, keep = []) {
+function autoItems(st, key, focusPats, rand, used, keep = [], n = exPerDay(st)) {
   const t = DAYS[key] || DAYS.fullA;
   const slots = [...t.slots];
   // Insert focus slots after the first two big lifts.
   slots.splice(2, 0, ...focusPats.filter(fp => regionAllows(t.region, fp)));
   const items = [...keep];
   for (const pat of slots) {
-    if (items.length >= exPerDay(st)) break;
+    if (items.length >= n) break;
     const ex = pick(st, pat, { exclude: items.map(i => i.exId), used, rand, compoundFirst: items.length < 2 });
     if (ex) items.push({ exId: ex.id, pat });
   }
@@ -191,8 +262,7 @@ function autoItems(st, key, focusPats, rand, used, keep = []) {
 
 // Exercises for the chosen muscle areas, taking one from each area in turn.
 // e.g. chest + biceps → chest press, curl, chest fly, curl.
-function itemsForAreas(st, areas, rand, used, keep = []) {
-  const n = exPerDay(st);
+function itemsForAreas(st, areas, rand, used, keep = [], n = exPerDay(st)) {
   const queues = areas.map(a => [...(AREAS[a]?.pats || [])]);
   const items = [...keep];
   while (items.length < n && queues.some(q => q.length)) {
@@ -221,7 +291,7 @@ export function setDayAreas(p, dayIdx, areas) {
   p.stats.dayAreas[dayIdx] = [...areas];
   if (areas.length) {
     day.muscles = [...areas];
-    day.items = itemsForAreas(p.stats, areas, rng(p.id + areas.join() + Date.now()), usedElsewhere(p, dayIdx));
+    day.items = itemsForAreas(p.stats, areas, rng(p.id + areas.join() + Date.now()), usedElsewhere(p, dayIdx), [], dayCap(p));
   } else {
     delete day.muscles;
   }
@@ -231,14 +301,14 @@ export function setDayAreas(p, dayIdx, areas) {
 // Makes a day have exactly the profile's number of exercises: extra ones are dropped, missing ones are added.
 export function fitDay(p, dayIdx) {
   const day = p.plan.days[dayIdx];
-  const n = exPerDay(p.stats);
+  const n = dayCap(p);
   if (day.items.length > n) { day.items = day.items.slice(0, n); return; }
   if (day.items.length === n) return;
   const rand = rng(p.id + dayIdx + Date.now());
   const used = usedElsewhere(p, dayIdx);
   const areas = day.muscles || [];
-  day.items = areas.length ? itemsForAreas(p.stats, areas, rand, used, day.items)
-    : autoItems(p.stats, day.key, (p.stats.focus || []).flatMap(f => FOCUS[f]?.pats || []), rand, used, day.items);
+  day.items = areas.length ? itemsForAreas(p.stats, areas, rand, used, day.items, n)
+    : autoItems(p.stats, day.key, (p.stats.focus || []).flatMap(f => FOCUS[f]?.pats || []), rand, used, day.items, n);
 }
 
 // Plans made by older versions are moved to the current format; progress (done weeks) and history are kept.
@@ -278,7 +348,12 @@ export function phaseOf(week) {
 }
 
 // Sets / reps / rest for an exercise in a given week. Always SETS sets; the phases change reps and weight.
-export function prescribe(stats, ex, week, restScale = 1) {
+export function prescribe(stats, ex, week, restScale = 1, tpl = null) {
+  if (tpl) {
+    const b = TPL_RX[phaseOf(week).key];
+    const hold = ex.unit === 'sec';
+    return { sets: b.sets, reps: [...(hold ? b.hold : b.reps)], rest: Math.max(45, Math.round((hold ? 45 : b.rest) * restScale / 15) * 15), unit: ex.unit };
+  }
   const g = GOALS[stats.goal] || GOALS.general;
   const b = ex.iso ? g.iso : g.compound;
   let reps = [...b.reps], rest = b.rest;
@@ -316,7 +391,7 @@ export function suggest(p, ex, rx, week) {
   if (!last && p.startKg?.[ex.id] != null) {
     kg = p.startKg[ex.id]; // weight the user set in a day preview before ever logging this exercise
   } else if (!last) {
-    kg = estimateWeight(p.stats, ex);
+    kg = estimateWeight(p.plan?.template ? { ...p.stats, level: 'beginner', goal: 'general' } : p.stats, ex);
     estimated = !!ex.load;
     if (estimated) note = 'Starting estimate – tap the sets to change it.';
   } else {
@@ -350,7 +425,7 @@ export function buildSession(p, week, dayIdx) {
   const items = day.items.map(it => {
     const ex = exById(it.exId);
     if (!ex) return null;
-    const rx = prescribe(st, ex, week, p.plan.restScale || 1);
+    const rx = prescribe(st, ex, week, p.plan.restScale || 1, p.plan.template);
     const sg = suggest(p, ex, rx, week);
     const edit = p.plan.edits?.[editKey(week, dayIdx, ex.id)];
     const sets = Array.from({ length: rx.sets }, (_, k) => {

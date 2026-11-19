@@ -1,6 +1,6 @@
 // App shell: router, bottom navigation, event delegation and the timer loop.
 import { state, profile, touchProfile } from './store.js';
-import { upgradePlan, exPerDay } from './planner.js';
+import { upgradePlan, dayCap } from './planner.js';
 import { actions, icon, $, closeSheet, fmtClock, applyTheme } from './ui.js';
 import * as W from './workout.js';
 import { syncNow, syncEnabled, scheduleSync } from './sync.js';
@@ -131,7 +131,7 @@ function upgradePlans() {
   for (const p of Object.values(state.profiles)) {
     let c = upgradePlan(p);
     // No day may have more exercises than set in the profile.
-    for (const day of p.plan?.days || []) if (day.items.length > exPerDay(p.stats)) { day.items = day.items.slice(0, exPerDay(p.stats)); c = true; }
+    for (const day of p.plan?.days || []) if (day.items.length > dayCap(p)) { day.items = day.items.slice(0, dayCap(p)); c = true; }
     if (c) { touchProfile(p); changed = true; }
   }
   if (changed) scheduleSync();

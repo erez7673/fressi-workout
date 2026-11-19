@@ -116,6 +116,7 @@ export function profileView() {
         <small>${esc(GOALS[s.goal].name)} · ${s.days} days × ${s.minutes} min</small></div></div>
       <div class="card list">
         <a class="eqrow" href="#/onboard/edit"><span>Edit stats, goal & schedule</span>${icon.chev}</a>
+        <button class="eqrow" data-act="tpl-open"><span>Ready-made plans (beginner, 50+)</span>${icon.chev}</button>
         <button class="eqrow" data-act="switch-profile"><span>Switch profile</span><span class="muted">${profileList().length} profiles ${icon.chev}</span></button>
         <a class="eqrow" href="#/onboard"><span>Add a profile (partner)</span>${icon.plus}</a>
         <a class="eqrow" href="#/gym"><span>Gym setup</span>${icon.chev}</a>

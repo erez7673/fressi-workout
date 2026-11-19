@@ -1,7 +1,7 @@
 // My Plan, day preview, active workout and summary screens.
 import { state, profile, exById, photoFor, isAvailable, touchProfile, save, lastLogFor } from './store.js';
 import { esc, icon, thumb, register, sheet, closeSheet, toast, fmtClock, fmtKg, fmtDate, fmtDur, setLabel, themeButton } from './ui.js';
-import { currentWeek, planProgress, dayFocus, phaseOf, buildSession, estimateMinutes, estimateCalories, swapOptions, generatePlan, editKey, AREAS, setDayAreas, exPerDay, warmOptions, warmPref } from './planner.js';
+import { currentWeek, planProgress, dayFocus, phaseOf, buildSession, estimateMinutes, estimateCalories, swapOptions, generatePlan, editKey, AREAS, setDayAreas, exPerDay, dayCap, warmOptions, warmPref, TEMPLATES, TPL_PHASES, generateTemplatePlan, templateExNames } from './planner.js';
 import { MUSCLES, PATTERN_NAMES } from './exercises.js';
 import * as W from './workout.js';
 import { rerender } from './app.js';
@@ -16,7 +16,8 @@ export function planView() {
   const p = profile();
   if (!p.plan) {
     return { html: `<header class="top"><h1>Hi ${esc(p.name)}</h1>${avatar(p)}</header>
-      <div class="card center"><p>You don't have a plan yet.</p><button class="btn primary" data-act="make-plan">Build my plan</button></div>` };
+      <div class="card center"><p>You don't have a plan yet.</p><button class="btn primary" data-act="make-plan">Build my plan</button>
+      <button class="btn" data-act="tpl-open">Or choose a ready-made plan</button></div>` };
   }
   const plan = p.plan;
   const cw = currentWeek(plan);
@@ -67,15 +68,36 @@ register({
     const p = profile(); const plan = p.plan;
     sheet(`<h2>${esc(plan.name)}</h2>
       <p class="muted">${plan.weeks} weeks · ${plan.days.length} days per week · ${p.stats.minutes} min sessions</p>
-      <ul class="plain">
+      ${plan.template ? `<ul class="plain"><li><b>Every day:</b> ${dayCap(p)} exercises, plus warm-up${plan.days[0]?.cardio ? ', a short walk' : ''} and cooldown. Tap any day to swap, add or remove exercises and to change sets, reps and kg.</li>
+        ${TPL_PHASES.map(([a, b]) => `<li><b>${a}:</b> ${b}</li>`).join('')}</ul>`
+      : `<ul class="plain">
         <li><b>Every day:</b> ${exPerDay(p.stats)} exercise${exPerDay(p.stats) > 1 ? 's' : ''} × 4 sets, plus warm-up${p.stats.cardio ? ', cardio finisher' : ''} and cooldown. Open a day to choose its muscle areas or change the warm-up.</li>
         <li><b>Weeks 1–4:</b> learn the movements, find your working weights.</li>
         <li><b>Weeks 5–8:</b> more reps per set.</li>
         <li><b>Weeks 9–11:</b> ${['strength', 'hypertrophy'].includes(p.stats.goal) ? 'heavier with fewer reps' : 'keep building reps and weight'}.</li>
         <li><b>Week 12:</b> deload – lighter so your body recovers.</li>
-      </ul>
+      </ul>`}
       <p class="muted">The app raises the weight automatically when you hit the top of the rep range on every set. Tap the sets on a day to change reps or kg.</p>
+      <button class="btn" data-act="tpl-open">Ready-made plans</button>
       <button class="btn" data-act="go" data-href="#/profile">Plan settings</button>`);
+  },
+  'tpl-open': () => {
+    const cur = profile().plan?.template;
+    sheet(`<h2>Ready-made plans</h2>
+      <p class="muted small">Fixed full-body plans for women starting out around 50+. They follow research on strength training for this age: whole body, machines first, 6 exercises a day, 2–3 sets of 10–15 reps, light start. You can still swap, add or remove exercises and change sets, reps and kg on every day.</p>
+      ${Object.entries(TEMPLATES).map(([k, t]) => `<div class="card">
+        <b>${esc(t.name)}</b>${cur === k ? ' <span class="pill">Current</span>' : ''}
+        <p class="muted small">${esc(t.blurb)}</p>
+        <ul class="plain">${t.days.map((_, di) => `<li><b>Day ${'ABC'[di]}:</b> ${esc(templateExNames(k, di).join(', '))}</li>`).join('')}</ul>
+        <button class="btn primary" data-act="tpl-use" data-k="${k}">${cur === k ? 'Restart this plan' : 'Use this plan'}</button></div>`).join('')}
+      <button class="btn ghost" data-act="sheet-close">Cancel</button>`);
+  },
+  'tpl-use': (el) => {
+    const p = profile();
+    if (p.plan && Object.keys(p.plan.done).length && !confirm('A new plan restarts at week 1 (your history is kept). Continue?')) return;
+    p.plan = generateTemplatePlan(p, el.dataset.k);
+    viewWeek = null;
+    touchProfile(p); scheduleSync(); closeSheet(); location.hash = '#/plan'; rerender(); toast('Plan ready!');
   },
   'switch-profile': () => {
     const list = Object.values(state.profiles);
@@ -165,7 +187,7 @@ function openAreas(d) {
   const day = profile().plan.days[d];
   areaSel ||= [...(day.muscles || [])];
   sheet(`<h2>${esc(day.name)}: muscle areas</h2>
-    <p class="muted small">Pick one or more. The app chooses ${exPerDay(profile().stats)} exercise(s) for them (set the number under Profile → Edit) from the equipment in your gym. You can still swap or remove single exercises afterwards.</p>
+    <p class="muted small">Pick one or more. The app chooses ${dayCap(profile())} exercise(s) for them (set the number under Profile → Edit) from the equipment in your gym. You can still swap or remove single exercises afterwards.</p>
     <div class="choices grid">${Object.entries(AREAS).map(([k, a]) => `<button class="choice ${areaSel.includes(k) ? 'on' : ''}" data-act="areas-toggle" data-d="${d}" data-k="${k}">${esc(a.name)}</button>`).join('')}</div>
     <button class="btn primary" data-act="areas-save" data-d="${d}" ${areaSel.length ? '' : 'disabled'}>Pick exercises for these areas</button>
     ${day.muscles?.length ? `<button class="btn ghost" data-act="areas-clear" data-d="${d}">Let the app choose the areas</button>` : ''}`);
