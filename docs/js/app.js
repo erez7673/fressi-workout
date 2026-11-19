@@ -87,10 +87,11 @@ setInterval(() => {
     } else if (k === 'restbar') {
       const pct = s.restTotal ? Math.max(0, Math.min(100, W.restLeft() / s.restTotal * 100)) : 0;
       el.style.width = pct + '%';
-    } else if (k === 'cardio' && s.cardio?.endAt) {
-      const left = (s.cardio.endAt - Date.now()) / 1000;
+    } else if ((k === 'cardio' || k === 'warm') && s[k]?.endAt) {
+      // Timed cardio (warm-up machine or finisher): beep once when the time is up.
+      const left = (s[k].endAt - Date.now()) / 1000;
       el.textContent = left > 0 ? fmtClock(Math.ceil(left)) : 'Done!';
-      if (left <= 0 && !s.cardio.fired) { s.cardio.fired = true; s.cardio.done = true; W.beep(4); rerender(); }
+      if (left <= 0 && !s[k].fired) { s[k].fired = true; W.timerDone(k); W.beep(4); rerender(); }
     }
   }
 }, 250);

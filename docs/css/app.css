@@ -157,6 +157,14 @@ small { display: block; color: var(--ink3); font-size: 13px; }
 button.chips.editable { background: none; border: 0; padding: 0; font: inherit; text-align: left; cursor: pointer; }
 .chip.edit { display: inline-flex; align-items: center; gap: 4px; color: var(--blue); border-color: var(--blue); border-style: dashed; }
 .chip.edit svg { width: 14px; height: 14px; }
+button.chips.lead-chips { margin: 0 0 14px; }
+.cardio-card .iconbtn svg { width: 20px; height: 20px; color: var(--blue); }
+.stepper { display: flex; align-items: center; gap: 10px; }
+.stepper input { width: 80px; text-align: center; }
+.stepper .pillbtn { min-width: 48px; font-size: 20px; padding: 6px 14px; }
+.row > span:not(.avatar):not(.pill):not(.thumb) { display: grid; gap: 2px; }
+.row.sel b { color: var(--blue); }
+.row[disabled] { opacity: .5; }
 .chip.sel { padding: 6px 14px; border-radius: 99px; }
 .chip.sel.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .chipscroll { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 10px; margin: 0 -16px; padding-left: 16px; padding-right: 16px; scrollbar-width: none; }

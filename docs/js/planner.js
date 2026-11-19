@@ -5,7 +5,23 @@ import { allExercises, isAvailable, exById, lastLogFor, uid } from './store.js';
 export const PLAN_WEEKS = 12;
 export const EX_PER_DAY = 4;   // exercises per workout day (not counting warm-up and cardio finisher)
 export const SETS = 4;         // sets per exercise
-const PLAN_FMT = 2;            // bump when the plan shape changes (see upgradePlan)
+const PLAN_FMT = 3;            // bump when the plan shape changes (see upgradePlan)
+
+export const dayName = (i) => `Workout Day ${'ABCDEFG'[i] || i + 1}`;
+const planName = (st) => `${GOALS[st.goal]?.name || 'Training'} · ${st.days || 3} days a week`;
+
+// Muscle areas the user can pick for a workout day. pats: plan slots, taken in order.
+export const AREAS = {
+  chest: { name: 'Chest', pats: ['h-push', 'chest-iso', 'h-push', 'chest-iso'] },
+  back: { name: 'Back', pats: ['v-pull', 'h-pull', 'h-pull', 'v-pull'] },
+  shoulders: { name: 'Shoulders', pats: ['v-push', 'side-delt', 'rear-delt', 'side-delt'] },
+  biceps: { name: 'Biceps', pats: ['biceps', 'biceps', 'biceps'] },
+  triceps: { name: 'Triceps', pats: ['triceps', 'triceps', 'triceps'] },
+  legs: { name: 'Legs', pats: ['squat', 'hinge', 'lunge', 'quad-iso', 'ham-iso'] },
+  glutes: { name: 'Glutes', pats: ['glute', 'hinge', 'glute', 'lunge'] },
+  calves: { name: 'Calves', pats: ['calf', 'calf'] },
+  core: { name: 'Core / abs', pats: ['core', 'core', 'core'] },
+};
 
 export const GOALS = {
   hypertrophy: { name: 'Build muscle', compound: { sets: 3, reps: [8, 10], rest: 90 }, iso: { sets: 3, reps: [10, 12], rest: 60 }, cardio: 0, factor: 1 },
@@ -129,23 +145,28 @@ export function generatePlan(p) {
 
   const days = split.days.map((key, di) => {
     const t = DAYS[key];
-    let slots = [...t.slots];
-    // Insert focus slots after the first two big lifts.
-    const extra = focusPats.filter(fp => regionAllows(t.region, fp));
-    slots.splice(2, 0, ...extra);
-    // Exactly EX_PER_DAY exercises (warm-up and cardio finisher come on top).
-    const items = [];
-    for (const pat of slots) {
-      if (items.length >= EX_PER_DAY) break;
-      const ex = pick(st, pat, { exclude: items.map(i => i.exId), used, rand, compoundFirst: items.length < 2 });
-      if (ex) items.push({ exId: ex.id, pat });
+    const muscles = p.plan?.days?.[di]?.muscles; // muscle areas the user picked for this day are kept on rebuild
+    let items;
+    if (muscles?.length) items = itemsForAreas(st, muscles, rand, used);
+    else {
+      let slots = [...t.slots];
+      // Insert focus slots after the first two big lifts.
+      const extra = focusPats.filter(fp => regionAllows(t.region, fp));
+      slots.splice(2, 0, ...extra);
+      // Exactly EX_PER_DAY exercises (warm-up and cardio finisher come on top).
+      items = [];
+      for (const pat of slots) {
+        if (items.length >= EX_PER_DAY) break;
+        const ex = pick(st, pat, { exclude: items.map(i => i.exId), used, rand, compoundFirst: items.length < 2 });
+        if (ex) items.push({ exId: ex.id, pat });
+      }
     }
     let cardio = null;
     if (budget.cardio) {
       const c = pick(st, 'cardio', { exclude: [], used, rand });
       if (c) cardio = { exId: c.id, min: budget.cardio };
     }
-    return { key, name: t.name, items, cardio };
+    return { key, name: dayName(di), items, cardio, ...(muscles?.length ? { muscles } : {}) };
   });
 
   // Sets are fixed, so shorten the rests (down to 45 s) if the longest day doesn't fit the session length.
@@ -155,23 +176,60 @@ export function generatePlan(p) {
 
   return {
     id: uid('plan'), version: (p.plan?.version || 0) + 1, createdAt: Date.now(), fmt: PLAN_FMT,
-    name: `${GOALS[st.goal]?.name || 'Training'} · ${split.name}`,
+    name: planName(st),
     weeks: PLAN_WEEKS, goal: st.goal, days, done: {}, restScale, edits: {},
   };
 }
 
-// Plans made before the 4 × 4 format get new days; progress (done weeks) and history are kept.
+// EX_PER_DAY exercises for the chosen muscle areas, taking one from each area in turn.
+// e.g. chest + biceps → chest press, curl, chest fly, curl.
+function itemsForAreas(st, areas, rand, used) {
+  const queues = areas.map(a => [...(AREAS[a]?.pats || [])]);
+  const items = [];
+  while (items.length < EX_PER_DAY && queues.some(q => q.length)) {
+    for (const q of queues) {
+      if (items.length >= EX_PER_DAY) break;
+      const pat = q.shift();
+      if (!pat) continue;
+      const ex = pick(st, pat, { exclude: items.map(i => i.exId), used, rand, compoundFirst: items.length < 2 });
+      if (ex) items.push({ exId: ex.id, pat });
+    }
+  }
+  return items;
+}
+
+// New exercises for one day after the user picks its muscle areas.
+export function setDayAreas(p, dayIdx, areas) {
+  const day = p.plan.days[dayIdx];
+  const used = new Map();
+  p.plan.days.forEach((d, i) => { if (i !== dayIdx) d.items.forEach(it => used.set(it.exId, (used.get(it.exId) || 0) + 1)); });
+  if (areas.length) {
+    day.muscles = [...areas];
+    day.items = itemsForAreas(p.stats, areas, rng(p.id + areas.join() + Date.now()), used);
+  } else {
+    delete day.muscles;
+  }
+}
+
+// Plans made by older versions are moved to the current format; progress (done weeks) and history are kept.
 export function upgradePlan(p) {
   if (!p.plan || p.plan.fmt === PLAN_FMT) return false;
   const old = p.plan;
+  if (old.fmt === 2) { // same exercises, only the names changed ("Full Body A" → "Workout Day A")
+    old.days.forEach((d, i) => { d.name = dayName(i); });
+    old.name = planName(p.stats);
+    for (const h of p.history || []) if (h.planId === old.id && old.days[h.dayIdx]) h.title = dayName(h.dayIdx);
+    old.fmt = PLAN_FMT;
+    return true;
+  }
   const fresh = generatePlan({ ...p, plan: { version: (old.version || 1) - 1 } });
   p.plan = { ...fresh, id: old.id, version: old.version, createdAt: old.createdAt, done: old.done || {} };
   return true;
 }
 
 export function dayFocus(day) {
-  const names = [];
-  for (const it of day.items) {
+  const names = (day.muscles || []).map(a => AREAS[a]?.name).filter(Boolean);
+  if (!names.length) for (const it of day.items) {
     const ex = exById(it.exId);
     if (!ex) continue;
     for (const m of [ex.m]) if (!names.includes(MUSCLES[m])) names.push(MUSCLES[m]);
@@ -276,7 +334,11 @@ export function buildSession(p, week, dayIdx) {
     };
   }).filter(Boolean);
 
-  const warmup = st.warmup ? scaleMoves(WARMUP, st.warmup * 60) : [];
+  // Warm-up: a timed cardio machine the user picks (same for every day), then a short mobility routine.
+  const wp = warmPref(p);
+  const warmEx = wp.min > 0 && exById(wp.exId);
+  const warm = warmEx ? { exId: warmEx.id, name: warmEx.name, min: wp.min, done: false } : null;
+  const warmup = warm ? WARMUP.slice(1).map(m => ({ ...m })) : [];
   const muscles = new Set(items.map(i => exById(i.exId)?.m).filter(Boolean));
   const cool = [...muscles].map(m => COOLDOWN[m]).filter(Boolean).slice(0, 5);
   cool.push(COOLDOWN.general);
@@ -284,22 +346,27 @@ export function buildSession(p, week, dayIdx) {
 
   return {
     id: uid('s'), profileId: p.id, planId: p.plan.id, week, dayIdx, title: day.name,
-    focus: dayFocus(day), startedAt: null, items, warmup, cooldown: cool, cardio,
+    focus: dayFocus(day), startedAt: null, items, warm, warmup, cooldown: cool, cardio,
     budget,
   };
 }
 
-function scaleMoves(moves, totalSec) {
-  const sum = moves.reduce((a, m) => a + m.sec, 0);
-  const f = totalSec / sum;
-  return moves.map(m => ({ name: m.name, sec: Math.max(20, Math.round(m.sec * f / 10) * 10) }));
+// Cardio machines that can be used for the warm-up (only what's on in Gym Setup).
+export const warmOptions = () => allExercises().filter(e => e.pat === 'cardio' && isAvailable(e));
+
+// The profile's warm-up choice: machine + minutes. Defaults to the exercise bike for the profile's warm-up length.
+export function warmPref(p) {
+  const opts = warmOptions();
+  let exId = p.warm?.exId;
+  if (!opts.some(e => e.id === exId)) exId = (opts.find(e => e.id === 'bike') || opts[0])?.id || null;
+  return { exId, min: p.warm?.min ?? p.stats.warmup ?? 5 };
 }
 
 export function estimateMinutes(session) {
   const lift = session.items.reduce((a, it) => a + exerciseSeconds({ sets: it.sets.length, rest: it.rest, unit: it.unit, reps: it.target.reps }), 0);
   const warm = session.warmup.reduce((a, m) => a + m.sec, 0);
   const cool = session.cooldown.reduce((a, m) => a + m.sec, 0);
-  return Math.round((lift + warm + cool) / 60 + (session.cardio ? session.cardio.min : 0));
+  return Math.round((lift + warm + cool) / 60 + (session.cardio ? session.cardio.min : 0) + (session.warm ? session.warm.min : 0));
 }
 
 export function estimateCalories(stats, minutes) {

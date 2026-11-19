@@ -6,7 +6,7 @@ import { EQUIPMENT, EQUIP_CATS } from './equipment.js';
 import { POSITIONS, GRIPS, FEEL, matchExercises, customExercise, identifyWithAI } from './identify.js';
 import { lineChart } from './charts.js';
 import { EQUIP_PIC } from './pictures.js';
-import { generatePlan } from './planner.js';
+import { generatePlan, dayFocus, sessionBudget, warmPref } from './planner.js';
 import { rerender } from './app.js';
 import { scheduleSync } from './sync.js';
 
@@ -75,6 +75,7 @@ export function exerciseView(id) {
         <span class="chip">${esc(PATTERN_NAMES[ex.pat] || '')}</span>
       </div>
       <p class="muted">${icon.gym} ${esc(eqText(ex.eq))}${isAvailable(ex) ? '' : ' · <b class="warn">not in your gym setup</b>'}</p>
+      ${p.plan ? `<button class="btn primary" data-act="add-to-day" data-id="${ex.id}">${icon.plus} Add to workout</button>` : ''}
       ${machines.length ? `<p class="muted">Your machine: ${machines.map(m => esc([m.name, m.brand, m.model].filter(Boolean).join(' · '))).join(', ')}</p>` : ''}
       ${avoid.length ? `<div class="card warncard">⚠️ Marked as risky for your ${avoid.join(', ')} – go light or swap it.</div>` : ''}
       <h3>How to do it</h3>
@@ -91,6 +92,43 @@ export function exerciseView(id) {
       <p class="muted small">Likes and dislikes are used next time you rebuild your plan.</p>`,
   };
 }
+
+// "Add to workout": pick one of the plan's workout days (as many as the profile's days per week).
+// Cardio exercises become that day's finisher, or the warm-up machine.
+function addToDaySheet(ex) {
+  const p = profile();
+  const cardio = ex.pat === 'cardio';
+  sheet(`<h2>Add to workout</h2>
+    <p class="muted small">${esc(ex.name)}${cardio ? ' – as the cardio finisher of:' : ' – added to every week of:'}</p>
+    ${p.plan.days.map((day, d) => {
+      const has = cardio ? day.cardio?.exId === ex.id : day.items.some(it => it.exId === ex.id);
+      return `<button class="row" data-act="add-to-day-pick" data-id="${ex.id}" data-d="${d}" ${has ? 'disabled' : ''}>
+        <span><b>${esc(day.name)}</b><small>${esc(dayFocus(day))}</small></span>${has ? '<span class="pill">Already in it</span>' : icon.plus}</button>`;
+    }).join('')}
+    ${cardio ? `<button class="row" data-act="add-to-warm" data-id="${ex.id}"><span><b>Use as my warm-up</b><small>All workout days</small></span>${icon.plus}</button>` : ''}
+    <button class="btn ghost" data-act="sheet-close">Cancel</button>`);
+}
+
+register({
+  'add-to-day': (el) => addToDaySheet(exById(el.dataset.id)),
+  'add-to-day-pick': (el) => {
+    const p = profile(); const ex = exById(el.dataset.id); const day = p.plan.days[+el.dataset.d];
+    if (ex.pat === 'cardio') {
+      day.cardio = { exId: ex.id, min: day.cardio?.min || sessionBudget(p.stats).cardio || 10 };
+      toast(`Cardio finisher of ${day.name}`);
+    } else {
+      day.items.push({ exId: ex.id, pat: ex.pat });
+      toast(`Added to ${day.name} (${day.items.length} exercises)`);
+    }
+    touchProfile(p); scheduleSync(); closeSheet(); rerender();
+  },
+  'add-to-warm': (el) => {
+    const p = profile();
+    p.warm = { ...warmPref(p), exId: el.dataset.id };
+    if (!p.warm.min) p.warm.min = 5;
+    touchProfile(p); scheduleSync(); closeSheet(); toast('Set as your warm-up');
+  },
+});
 
 function toggleIn(arr, v) { const i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
 register({

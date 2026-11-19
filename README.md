@@ -4,6 +4,9 @@ A personal workout app (installable web app) for Android and iPhone, built for F
 
 - 12-week plans built from your stats, goal, schedule, injuries and focus areas: 4 exercises × 4 sets per day, plus warm-up, optional cardio finisher and cooldown
 - Tap the sets on a day to change reps or kg before you start
+- Pick the muscle areas of each workout day (e.g. Workout Day A: chest + biceps) and the app chooses the exercises
+- Warm-up on a cardio machine you pick, for the minutes you set, with a beep when it's done
+- "Add to workout" on any exercise page puts it into one of your workout days
 - Set timer, automatic rest countdown with a beep at the end, screen kept awake during workouts
 - Light / dark mode (button on My Plan, or Profile → Appearance; Auto follows the phone)
 - Automatic progression: weight goes up when you hit the top of the rep range on every set

@@ -166,6 +166,24 @@ export function tick() {
   return null;
 }
 
+// Timed cardio blocks: k = 'warm' (warm-up machine) or 'cardio' (finisher).
+export function startTimer(k) {
+  const c = S()?.[k];
+  if (!c) return;
+  unlockAudio();
+  c.endAt = Date.now() + c.min * 60000; c.fired = false; c.done = false;
+  save();
+}
+
+export function timerDone(k) {
+  const s = S(), c = s?.[k];
+  if (!c) return;
+  c.endAt = null; c.done = true;
+  // After the warm-up, restart the set timer so it counts from the first real set.
+  if (k === 'warm' && s.phase === 'work' && !s.items.some(it => it.sets.some(x => x.done))) s.workStart = Date.now();
+  save();
+}
+
 export function finish() {
   const s = S();
   const p = state.profiles[s.profileId] || profile();
