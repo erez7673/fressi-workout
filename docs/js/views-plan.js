@@ -84,7 +84,7 @@ register({
   'tpl-open': () => {
     const cur = profile().plan?.template;
     sheet(`<h2>Ready-made plans</h2>
-      <p class="muted small">Fixed full-body plans for women starting out around 50+. They follow research on strength training for this age: whole body, machines first, 6 exercises a day, 2–3 sets of 10–15 reps, light start. You can still swap, add or remove exercises and change sets, reps and kg on every day.</p>
+      <p class="muted small">Fixed full-body plans for women starting out around 50+. They follow research on strength training for this age: whole body, machines first, 4–6 exercises a day, 2–3 sets of 10–15 reps, light start. You can still swap, add or remove exercises and change sets, reps and kg on every day.</p>
       ${Object.entries(TEMPLATES).map(([k, t]) => `<div class="card">
         <b>${esc(t.name)}</b>${cur === k ? ' <span class="pill">Current</span>' : ''}
         <p class="muted small">${esc(t.blurb)}</p>

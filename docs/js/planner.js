@@ -44,6 +44,13 @@ const TPL_DAYS = {
     ['machine-shoulder-press', 'db-shoulder-press', 'smith-ohp'], ['db-rdl', 'back-ext', 'cable-pull-through'], ['leg-curl'], ['side-plank', 'dead-bug']],
   fullC: [['stepup', 'reverse-lunge', 'split-squat'], ['db-bench', 'machine-chest-press', 'pushup'],
     ['seated-cable-row', 'machine-row', 'db-row'], ['back-ext', 'glute-bridge'], ['abductor', 'cable-kickback'], ['dead-bug', 'plank']],
+  // Short days: 4 exercises – legs, a push, a pull and hips/core – so each session is about 30 minutes.
+  shortA: [['leg-press', 'goblet-squat', 'smith-squat'], ['machine-chest-press', 'plate-chest-press', 'db-bench', 'pushup'],
+    ['machine-row', 'seated-cable-row', 'plate-row', 'db-row'], ['plank', 'dead-bug']],
+  shortB: [['goblet-squat', 'leg-press', 'sumo-squat'], ['machine-shoulder-press', 'db-shoulder-press', 'smith-ohp'],
+    ['lat-pulldown', 'close-pulldown', 'assisted-chin'], ['glute-bridge', 'hip-thrust-machine']],
+  shortC: [['stepup', 'reverse-lunge', 'split-squat'], ['db-bench', 'machine-chest-press', 'pushup'],
+    ['seated-cable-row', 'machine-row', 'db-row'], ['back-ext', 'db-rdl', 'glute-bridge']],
 };
 
 export const TEMPLATES = {
@@ -51,6 +58,8 @@ export const TEMPLATES = {
     blurb: 'The softest way in: two full-body days with a rest day or two between. Move up to 3 days when it feels easy.' },
   steady: { name: 'Beginner full body · 3 days a week', short: '3 days a week', days: ['fullA', 'fullB', 'fullC'], perDay: 6,
     blurb: 'Three full-body days (for example Mon, Wed, Fri). Every muscle group is trained twice or more a week.' },
+  short: { name: 'Short full body · 3 days a week', short: '3 short days a week', days: ['shortA', 'shortB', 'shortC'], perDay: 4,
+    blurb: 'Three full-body days with only 4 exercises each – legs, a push, a pull and hips or core – so a session takes about 35–40 minutes with warm-up and cooldown.' },
 };
 
 // Sets, reps and rest per phase of a ready-made plan (bodyweight holds: seconds instead of reps).
