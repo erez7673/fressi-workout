@@ -21,7 +21,8 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET') return;
   // gym80 equipment pictures: cache first (they never change), so they show offline at the gym.
-  if (url.hostname === 'gym80.de' && url.pathname.startsWith('/wp-content/uploads/')) {
+  if ((url.hostname === 'gym80.de' && url.pathname.startsWith('/wp-content/uploads/'))
+    || (url.hostname === 'assets.jhtbrand.co' && url.pathname.startsWith('/files/product/'))) {
     e.respondWith(caches.open(PICS).then(c => c.match(e.request).then(hit => hit || fetch(e.request).then(res => {
       if (res.ok || res.type === 'opaque') c.put(e.request, res.clone());
       return res;

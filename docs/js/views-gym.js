@@ -13,7 +13,7 @@ import { scheduleSync } from './sync.js';
 const eqThumb = (id) => {
   const pic = EQUIP_PIC[id];
   return pic
-    ? `<span class="thumb pic sm"><img src="${pic.url}" alt="gym80 ${esc(pic.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></span>`
+    ? `<span class="thumb pic sm"><img src="${pic.url}" alt="${esc(pic.brand + ' ' + pic.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></span>`
     : `<span class="thumb sm"><span class="ico">${icon.gym}</span></span>`;
 };
 const eqName = (id) => EQUIPMENT.find(e => e.id === id)?.name || state.gym.machines.find(m => m.id === id)?.name || id;

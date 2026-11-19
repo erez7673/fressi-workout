@@ -1,7 +1,7 @@
 // My Plan, day preview, active workout and summary screens.
-import { state, profile, exById, photoFor, isAvailable, touchProfile, save } from './store.js';
+import { state, profile, exById, photoFor, isAvailable, touchProfile, save, lastLogFor } from './store.js';
 import { esc, icon, thumb, register, sheet, closeSheet, toast, fmtClock, fmtKg, fmtDate, fmtDur, setLabel, themeButton } from './ui.js';
-import { currentWeek, planProgress, dayFocus, phaseOf, buildSession, estimateMinutes, estimateCalories, swapOptions, generatePlan } from './planner.js';
+import { currentWeek, planProgress, dayFocus, phaseOf, buildSession, estimateMinutes, estimateCalories, swapOptions, generatePlan, editKey } from './planner.js';
 import { MUSCLES, PATTERN_NAMES } from './exercises.js';
 import * as W from './workout.js';
 import { rerender } from './app.js';
@@ -68,12 +68,13 @@ register({
     sheet(`<h2>${esc(plan.name)}</h2>
       <p class="muted">${plan.weeks} weeks · ${plan.days.length} days per week · ${p.stats.minutes} min sessions</p>
       <ul class="plain">
+        <li><b>Every day:</b> 4 exercises × 4 sets, plus warm-up${p.stats.cardio ? ', cardio finisher' : ''} and cooldown.</li>
         <li><b>Weeks 1–4:</b> learn the movements, find your working weights.</li>
-        <li><b>Weeks 5–8:</b> an extra set on the big lifts.</li>
-        <li><b>Weeks 9–11:</b> heavier with fewer reps (or more sets for fat loss / general).</li>
+        <li><b>Weeks 5–8:</b> more reps per set.</li>
+        <li><b>Weeks 9–11:</b> ${['strength', 'hypertrophy'].includes(p.stats.goal) ? 'heavier with fewer reps' : 'keep building reps and weight'}.</li>
         <li><b>Week 12:</b> deload – lighter so your body recovers.</li>
       </ul>
-      <p class="muted">The app raises the weight automatically when you hit the top of the rep range on every set.</p>
+      <p class="muted">The app raises the weight automatically when you hit the top of the rep range on every set. Tap the sets on a day to change reps or kg.</p>
       <button class="btn" data-act="go" data-href="#/profile">Plan settings</button>`);
   },
   'switch-profile': () => {
@@ -105,7 +106,7 @@ export function dayView(w, d) {
       <a href="#/ex/${encodeURIComponent(ex.id)}">${thumb(ex, photoFor(ex.id))}</a>
       <div class="exbody">
         <a href="#/ex/${encodeURIComponent(ex.id)}" class="exname">${esc(ex.name)}</a>
-        <div class="chips">${it.sets.map(s => `<span class="chip">${setLabel(s, it.unit)}</span>`).join('')}</div>
+        <button class="chips editable" data-act="edit-sets" data-w="${w}" data-d="${d}" data-i="${i}" aria-label="Edit reps and weight">${it.sets.map(s => `<span class="chip">${setLabel(s, it.unit)}</span>`).join('')}<span class="chip edit">${icon.edit} Edit</span></button>
         ${!avail ? '<em class="warn">Equipment marked as not available – swap it</em>' : it.note ? `<small class="note">${esc(it.note)}</small>` : ''}
       </div>
       <button class="iconbtn" data-act="ex-menu" data-d="${d}" data-i="${i}" aria-label="Options">${icon.dots}</button>
@@ -134,6 +135,25 @@ export function dayView(w, d) {
   };
 }
 
+// Bottom sheet to change the reps / kg of each set before the workout.
+function openSetEditor(w, d, i) {
+  const p = profile();
+  const it = buildSession(p, w, d).items[i];
+  if (!it) return;
+  const ex = exById(it.exId);
+  const edited = !!p.plan.edits?.[editKey(w, d, it.exId)];
+  const attrs = (k, f) => `data-change="pv-set" data-w="${w}" data-d="${d}" data-ex="${it.exId}" data-k="${k}" data-f="${f}"`;
+  sheet(`<h2>${esc(it.name)}</h2>
+    <p class="muted small">Week ${w} · target ${it.target.reps[0]}–${it.target.reps[1]} ${it.unit === 'sec' ? 's' : 'reps'}. Changing a set also changes the sets after it.</p>
+    <table class="sets"><thead><tr><th>Set</th><th>${it.unit === 'sec' ? 'Sec' : 'Reps'}</th><th>${it.assist ? 'Assist kg' : 'Kg'}</th></tr></thead><tbody>
+    ${it.sets.map((s, k) => `<tr><td><span class="setno">${k + 1}</span></td>
+      <td><input type="number" inputmode="numeric" min="0" value="${s.reps}" ${attrs(k, 'reps')}></td>
+      <td>${ex.load || s.kg ? `<input type="number" inputmode="decimal" min="0" step="0.5" value="${fmtKg(s.kg)}" ${attrs(k, 'kg')}>` : '<span class="muted">body weight</span>'}</td></tr>`).join('')}
+    </tbody></table>
+    ${edited ? `<button class="btn ghost" data-act="pv-reset" data-w="${w}" data-d="${d}" data-i="${i}" data-ex="${it.exId}">Back to the app's suggestion</button>` : ''}
+    <button class="btn primary" data-act="sheet-close">Done</button>`);
+}
+
 register({
   'start-day': (el) => {
     if (state.session?.startedAt && !confirm('A workout is already in progress. Discard it and start this one?')) return;
@@ -153,6 +173,32 @@ register({
       <h3>Swap for another ${esc(PATTERN_NAMES[it.pat] || '')} exercise</h3>
       ${opts.length ? opts.map(o => `<button class="row" data-act="swap" data-d="${d}" data-i="${i}" data-ex="${o.id}">${thumb(o, photoFor(o.id), 'sm')}<span><b>${esc(o.name)}</b><small>${esc(MUSCLES[o.m])}</small></span></button>`).join('') : '<p class="muted">No alternatives with your current gym setup.</p>'}
       <button class="row danger" data-act="remove-ex" data-d="${d}" data-i="${i}">${icon.trash}<b>Remove from this day</b></button>`);
+  },
+  'edit-sets': (el) => openSetEditor(+el.dataset.w, +el.dataset.d, +el.dataset.i),
+  'pv-set': (el) => {
+    const w = +el.dataset.w, d = +el.dataset.d, exId = el.dataset.ex, k = +el.dataset.k, f = el.dataset.f;
+    const p = profile();
+    const it = buildSession(p, w, d).items.find(x => x.exId === exId);
+    if (!it) return;
+    const sets = it.sets.map(s => ({ reps: s.reps, kg: s.kg }));
+    const v = Math.max(0, +el.value || 0);
+    // Carry the change to the following sets, like in the workout screen.
+    for (let j = k; j < sets.length; j++) {
+      sets[j][f] = v;
+      const inp = document.querySelector(`#sheet input[data-k="${j}"][data-f="${f}"]`);
+      if (inp && j > k) inp.value = f === 'kg' ? fmtKg(v) : v;
+    }
+    p.plan.edits ||= {};
+    p.plan.edits[editKey(w, d, exId)] = sets;
+    // Before the first log, a typed weight also becomes the starting weight for later weeks.
+    if (f === 'kg' && !lastLogFor(p, exId)) { p.startKg ||= {}; p.startKg[exId] = v; }
+    touchProfile(p); scheduleSync(); rerender();
+  },
+  'pv-reset': (el) => {
+    const p = profile(); const { w, d, ex, i } = el.dataset;
+    delete p.plan.edits?.[editKey(+w, +d, ex)];
+    if (p.startKg) delete p.startKg[ex];
+    touchProfile(p); scheduleSync(); rerender(); openSetEditor(+w, +d, +i);
   },
   'swap': (el) => {
     const p = profile();
@@ -242,6 +288,7 @@ export function sessionView() {
     <ul class="moves">${s.warmup.map((m, k) => `<li class="${m.done ? 'struck' : ''}" data-act="tick-move" data-list="warmup" data-k="${k}">${esc(m.name)}<span>${fmtDur(m.sec)}</span></li>`).join('')}</ul></details>` : '';
 
   const cardio = s.cardio ? `<div class="card cardio-card">
+    <a href="#/ex/${encodeURIComponent(s.cardio.exId)}">${thumb(exById(s.cardio.exId), null, 'sm')}</a>
     <div><b>${esc(s.cardio.name)}</b><small>${s.cardio.min} min finisher${s.cardio.done ? ' · done ✓' : ''}</small></div>
     ${s.cardio.endAt && !s.cardio.done ? `<b class="bigtime sm" data-t="cardio">--:--</b><button class="pillbtn" data-act="cardio-stop">Stop</button>`
       : s.cardio.done ? '' : `<button class="pillbtn dark" data-act="cardio-start">Start timer</button>`}

@@ -28,6 +28,7 @@ export const icon = {
   swap: P('<path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>'),
   sync: P('<path d="M21 12a9 9 0 0 1-15 6.7L3 16M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M3 21v-5h5"/>'),
   trash: P('<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>'),
+  edit: P('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>'),
   search: P('<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>'),
 };
 
@@ -39,7 +40,7 @@ export function thumb(ex, photo, size = 'md') {
   const fallback = `<span class="ico">${ex?.m === 'cardio' ? CARDIO_ICON : icon.gym}</span>`;
   const pic = picFor(ex);
   if (!pic) return `<div class="thumb ${size}">${fallback}</div>`;
-  return `<div class="thumb pic ${size}">${fallback}<img src="${pic.url}" alt="gym80 ${esc(pic.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></div>`;
+  return `<div class="thumb pic ${pic.brand.toLowerCase()} ${size}">${fallback}<img src="${pic.url}" alt="${esc(pic.brand + ' ' + pic.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></div>`;
 }
 
 let toastTimer;

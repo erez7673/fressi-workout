@@ -1,8 +1,9 @@
 // App shell: router, bottom navigation, event delegation and the timer loop.
-import { state, profile } from './store.js';
+import { state, profile, touchProfile } from './store.js';
+import { upgradePlan } from './planner.js';
 import { actions, icon, $, closeSheet, fmtClock, applyTheme } from './ui.js';
 import * as W from './workout.js';
-import { syncNow, syncEnabled } from './sync.js';
+import { syncNow, syncEnabled, scheduleSync } from './sync.js';
 import { planView, dayView, sessionView, summaryView } from './views-plan.js';
 import { libraryView, exerciseView, gymView, identifyView } from './views-gym.js';
 import { onboardView, profileView, progressView } from './views-me.js';
@@ -123,10 +124,19 @@ actions['back'] = () => history.length > 1 ? history.back() : (location.hash = '
 window.addEventListener('hashchange', () => { closeSheet(); render(); });
 
 // ── Start ──
+// Move plans made by older app versions to the current format (4 exercises × 4 sets).
+function upgradePlans() {
+  let changed = false;
+  for (const p of Object.values(state.profiles)) if (upgradePlan(p)) { touchProfile(p); changed = true; }
+  if (changed) scheduleSync();
+  return changed;
+}
+
+upgradePlans();
 applyTheme();
 render();
 applyTheme();
-if (syncEnabled()) syncNow().then(r => { if (r?.pulled) rerender(); }).catch(() => {});
+if (syncEnabled()) syncNow().then(r => { if (upgradePlans() || r?.pulled) rerender(); }).catch(() => {});
 window.addEventListener('online', () => syncEnabled() && syncNow().catch(() => {}));
 if (state.session?.startedAt) W.keepAwake(true);
 

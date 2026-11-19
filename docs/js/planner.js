@@ -3,6 +3,9 @@ import { MUSCLES, WARMUP, COOLDOWN } from './exercises.js';
 import { allExercises, isAvailable, exById, lastLogFor, uid } from './store.js';
 
 export const PLAN_WEEKS = 12;
+export const EX_PER_DAY = 4;   // exercises per workout day (not counting warm-up and cardio finisher)
+export const SETS = 4;         // sets per exercise
+const PLAN_FMT = 2;            // bump when the plan shape changes (see upgradePlan)
 
 export const GOALS = {
   hypertrophy: { name: 'Build muscle', compound: { sets: 3, reps: [8, 10], rest: 90 }, iso: { sets: 3, reps: [10, 12], rest: 60 }, cardio: 0, factor: 1 },
@@ -130,17 +133,12 @@ export function generatePlan(p) {
     // Insert focus slots after the first two big lifts.
     const extra = focusPats.filter(fp => regionAllows(t.region, fp));
     slots.splice(2, 0, ...extra);
+    // Exactly EX_PER_DAY exercises (warm-up and cardio finisher come on top).
     const items = [];
-    let seconds = 0;
     for (const pat of slots) {
-      if (items.length >= 3 && seconds >= budget.lift) break;
+      if (items.length >= EX_PER_DAY) break;
       const ex = pick(st, pat, { exclude: items.map(i => i.exId), used, rand, compoundFirst: items.length < 2 });
-      if (!ex) continue;
-      const rx = prescribe(st, ex, 6); // size the day for the highest-volume phase
-      const sec = exerciseSeconds(rx);
-      if (items.length >= 3 && seconds + sec > budget.lift + 120) continue;
-      items.push({ exId: ex.id, pat });
-      seconds += sec;
+      if (ex) items.push({ exId: ex.id, pat });
     }
     let cardio = null;
     if (budget.cardio) {
@@ -150,19 +148,25 @@ export function generatePlan(p) {
     return { key, name: t.name, items, cardio };
   });
 
-  // If even the minimum day is too long, cap the sets per exercise so it fits the session length.
-  let setCap = 5;
-  const daySec = (cap) => Math.max(...days.map(d => d.items.reduce((a, it) => {
-    const rx = prescribe(st, exById(it.exId), 6, cap);
-    return a + exerciseSeconds(rx);
-  }, 0)));
-  while (setCap > 2 && daySec(setCap) > budget.lift + 180) setCap--;
+  // Sets are fixed, so shorten the rests (down to 45 s) if the longest day doesn't fit the session length.
+  let restScale = 1;
+  const daySec = (sc) => Math.max(...days.map(d => d.items.reduce((a, it) => a + exerciseSeconds(prescribe(st, exById(it.exId), 1, sc)), 0)));
+  while (restScale > 0.3 && daySec(restScale) > budget.lift + 120) restScale = +(restScale - 0.05).toFixed(2);
 
   return {
-    id: uid('plan'), version: (p.plan?.version || 0) + 1, createdAt: Date.now(),
+    id: uid('plan'), version: (p.plan?.version || 0) + 1, createdAt: Date.now(), fmt: PLAN_FMT,
     name: `${GOALS[st.goal]?.name || 'Training'} · ${split.name}`,
-    weeks: PLAN_WEEKS, goal: st.goal, days, done: {}, setCap,
+    weeks: PLAN_WEEKS, goal: st.goal, days, done: {}, restScale, edits: {},
   };
+}
+
+// Plans made before the 4 × 4 format get new days; progress (done weeks) and history are kept.
+export function upgradePlan(p) {
+  if (!p.plan || p.plan.fmt === PLAN_FMT) return false;
+  const old = p.plan;
+  const fresh = generatePlan({ ...p, plan: { version: (old.version || 1) - 1 } });
+  p.plan = { ...fresh, id: old.id, version: old.version, createdAt: old.createdAt, done: old.done || {} };
+  return true;
 }
 
 export function dayFocus(day) {
@@ -185,27 +189,21 @@ export function phaseOf(week) {
   return { key: 'base', name: 'Phase 1 · Learn & build the base' };
 }
 
-// Sets / reps / rest for an exercise in a given week.
-export function prescribe(stats, ex, week, setCap = 5) {
+// Sets / reps / rest for an exercise in a given week. Always SETS sets; the phases change reps and weight.
+export function prescribe(stats, ex, week, restScale = 1) {
   const g = GOALS[stats.goal] || GOALS.general;
   const b = ex.iso ? g.iso : g.compound;
-  let sets = b.sets, reps = [...b.reps], rest = b.rest;
+  let reps = [...b.reps], rest = b.rest;
   const ph = phaseOf(week).key;
-  if (ph === 'build') sets += ex.iso ? 0 : 1;
-  if (ph === 'peak') {
-    if (stats.goal === 'strength' || stats.goal === 'hypertrophy') reps = reps.map(r => Math.max(3, r - 2));
-    else sets += ex.iso ? 0 : 1;
-  }
-  if (ph === 'deload') sets = Math.max(2, sets - 1);
-  if (stats.level === 'beginner') { sets = Math.min(sets, 3); if (week <= 2) sets = Math.max(2, sets - 1); }
-  sets = Math.min(sets, 5, setCap);
+  if (ph === 'build') reps = reps.map(r => r + (stats.goal === 'strength' ? 1 : 2));
+  if (ph === 'peak' && (stats.goal === 'strength' || stats.goal === 'hypertrophy')) reps = reps.map(r => Math.max(3, r - 2));
   if (ex.unit === 'sec') {
-    const base = ex.mot === 'carry' ? 30 : 30;
     const add = Math.min(30, (week - 1) * 3);
-    reps = [base + add, base + add + 15];
+    reps = [30 + add, 45 + add];
     rest = 60;
   }
-  return { sets, reps, rest, unit: ex.unit };
+  rest = Math.max(45, Math.round(rest * restScale / 15) * 15);
+  return { sets: SETS, reps, rest, unit: ex.unit };
 }
 
 const round = (v, inc) => Math.max(0, Math.round(v / inc) * inc);
@@ -227,10 +225,12 @@ export function estimateWeight(stats, ex) {
 export function suggest(p, ex, rx, week) {
   const last = lastLogFor(p, ex.id);
   let kg, reps = rx.reps[0], estimated = false, note = '';
-  if (!last) {
+  if (!last && p.startKg?.[ex.id] != null) {
+    kg = p.startKg[ex.id]; // weight the user set in a day preview before ever logging this exercise
+  } else if (!last) {
     kg = estimateWeight(p.stats, ex);
     estimated = !!ex.load;
-    if (estimated) note = 'Starting estimate – adjust to what feels right.';
+    if (estimated) note = 'Starting estimate – tap the sets to change it.';
   } else {
     const done = last.item.sets.filter(s => s.done);
     const lastKg = done.reduce((m, s) => Math.max(m, s.kg || 0), 0);
@@ -251,6 +251,9 @@ export function suggest(p, ex, rx, week) {
   return { kg: round(kg, ex.inc), reps, estimated, note };
 }
 
+// Reps/kg the user typed in the day preview, per week + day + exercise.
+export const editKey = (week, dayIdx, exId) => `${week}-${dayIdx}-${exId}`;
+
 // Builds the concrete session (what the workout screen runs) for a plan day.
 export function buildSession(p, week, dayIdx) {
   const day = p.plan.days[dayIdx];
@@ -259,12 +262,17 @@ export function buildSession(p, week, dayIdx) {
   const items = day.items.map(it => {
     const ex = exById(it.exId);
     if (!ex) return null;
-    const rx = prescribe(st, ex, week, p.plan.setCap || 5);
+    const rx = prescribe(st, ex, week, p.plan.restScale || 1);
     const sg = suggest(p, ex, rx, week);
+    const edit = p.plan.edits?.[editKey(week, dayIdx, ex.id)];
+    const sets = Array.from({ length: rx.sets }, (_, k) => {
+      const e = edit?.[k];
+      return { reps: e?.reps ?? sg.reps, kg: e?.kg ?? sg.kg, done: false };
+    });
     return {
       exId: ex.id, name: ex.name, unit: ex.unit, rest: rx.rest, assist: ex.assist,
-      target: { reps: rx.reps, kg: sg.kg }, note: sg.note, estimated: sg.estimated,
-      sets: Array.from({ length: rx.sets }, () => ({ reps: sg.reps, kg: sg.kg, done: false })),
+      target: { reps: rx.reps, kg: sg.kg }, note: edit ? 'Edited by you' : sg.note, estimated: sg.estimated && !edit,
+      sets,
     };
   }).filter(Boolean);
 

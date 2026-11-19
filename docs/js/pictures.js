@@ -1,9 +1,10 @@
-// Equipment pictures from the gym80 product catalogue (https://gym80.de/en/product/).
-// Images are loaded from gym80.de (not copied into this app) and cached by the service worker for offline use.
-// Matrix makes the cardio machines, so those have no gym80 picture and show a plain icon instead.
+// Equipment pictures from the gym80 product catalogue (https://gym80.de/en/product/) and, for cardio,
+// the Matrix Fitness catalogue (https://world.matrixfitness.com/eng/cardio/catalog).
+// Images are loaded from the makers' sites (not copied into this app) and cached by the service worker for offline use.
 
 const U = 'https://gym80.de/wp-content/uploads/';
-const P = (no, name, path) => ({ no, name, url: U + path });
+const P = (no, name, path) => ({ no, name, brand: 'gym80', url: U + path });
+const M = (name, hash) => ({ no: '', name, brand: 'Matrix', url: `https://assets.jhtbrand.co/files/product/${hash}/` });
 
 // gym80 product for each Gym Setup item.
 export const EQUIP_PIC = {
@@ -43,6 +44,12 @@ export const EQUIP_PIC = {
   'back-extension': P('4119', '45° Back Extension', '2025/07/4119_basic_45-grad_rueckenstrecker_NC.webp'),
   trx: P('9253', 'Sling Trainer', '2025/07/9253_Slingtrainer_NC.webp'),
   none: P('9690', 'Exercise Mat', '2025/07/9690_matte_NC.webp'),
+
+  treadmill: M('Performance Treadmill', '94e0531169335e9cd5930e9cf3c57f1429735993'),
+  elliptical: M('Performance Elliptical', 'e52f7b7452c071429be273eacc8467c39cd05957'),
+  'stair-climber': M('Performance ClimbMill', '49d898933f41bfaf4ce8920093fe0d0021d018c8'),
+  bike: M('Performance Recumbent Cycle', 'e9b1646e3b26fac90f47cb1e0b837faed5f3b3bb'),
+  rower: M('Rower', '57651c9b1b4a1637fd114f74275ef1aec33067a6'),
 };
 
 // Exercises where a different product shows the movement better than the first piece of equipment.

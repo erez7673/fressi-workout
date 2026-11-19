@@ -2,11 +2,12 @@
 
 A personal workout app (installable web app) for Android and iPhone, built for Fressi Jätkäsaari, Helsinki.
 
-- 12-week plans built from your stats, goal, schedule, injuries and focus areas
+- 12-week plans built from your stats, goal, schedule, injuries and focus areas: 4 exercises × 4 sets per day, plus warm-up, optional cardio finisher and cooldown
+- Tap the sets on a day to change reps or kg before you start
 - Set timer, automatic rest countdown with a beep at the end, screen kept awake during workouts
 - Light / dark mode (button on My Plan, or Profile → Appearance; Auto follows the phone)
 - Automatic progression: weight goes up when you hit the top of the rep range on every set
-- ~100 exercises with step-by-step instructions and a picture of the equipment (from the [gym80 catalogue](https://gym80.de/en/product/), loaded from gym80.de and cached for offline use; mapping in `docs/js/pictures.js`)
+- ~100 exercises with step-by-step instructions and a picture of the equipment (from the [gym80](https://gym80.de/en/product/) and [Matrix](https://world.matrixfitness.com/eng/cardio/catalog) catalogues, loaded from their sites and cached for offline use; mapping in `docs/js/pictures.js`)
 - Gym Setup for Fressi Jätkäsaari + "What is this machine?" photo picker for unknown machines
 - Progress charts (strength, body weight, workouts per week), workout history
 - Two (or more) profiles, synced between phones through a Google Sheet
