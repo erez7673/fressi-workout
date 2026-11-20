@@ -26,6 +26,35 @@ export const AREAS = {
   core: { name: 'Core / abs', pats: ['core', 'core', 'core'] },
 };
 
+// Muscle area of an exercise's main muscle, and the order areas are trained in a day (bigger muscles first).
+const MUSCLE_AREA = {
+  quads: 'legs', hamstrings: 'legs', adductors: 'legs', glutes: 'glutes', back: 'back', traps: 'back',
+  chest: 'chest', shoulders: 'shoulders', 'rear-delts': 'shoulders', triceps: 'triceps', biceps: 'biceps',
+  forearms: 'biceps', calves: 'calves', core: 'core',
+};
+export const AREA_ORDER = ['legs', 'glutes', 'back', 'chest', 'shoulders', 'triceps', 'biceps', 'calves', 'core'];
+export const areaOfEx = (ex) => MUSCLE_AREA[ex?.m] || null;
+
+// The muscle area an item of a day counts for: one of the day's chosen areas if it fits, else its main muscle's.
+export function itemArea(day, it) {
+  const ex = exById(it.exId);
+  const own = areaOfEx(ex);
+  const chosen = day?.muscles || [];
+  if (own && chosen.includes(own)) return own;
+  return chosen.find(a => AREAS[a]?.pats.includes(it.pat || ex?.pat)) || own || 'core';
+}
+
+// Puts a day's exercises in training order: bigger muscle areas first, and within an area compound lifts first.
+export function sortDay(day) {
+  const rank = (it) => {
+    const a = AREA_ORDER.indexOf(itemArea(day, it));
+    return (a < 0 ? 99 : a) * 2 + (exById(it.exId)?.iso ? 1 : 0);
+  };
+  const before = day.items.map(i => i.exId).join();
+  day.items = day.items.map((it, k) => [it, k]).sort((x, y) => rank(x[0]) - rank(y[0]) || x[1] - y[1]).map(x => x[0]);
+  return day.items.map(i => i.exId).join() !== before;
+}
+
 export const GOALS = {
   hypertrophy: { name: 'Build muscle', compound: { sets: 3, reps: [8, 10], rest: 90 }, iso: { sets: 3, reps: [10, 12], rest: 60 }, cardio: 0, factor: 1 },
   strength: { name: 'Strength', compound: { sets: 4, reps: [4, 6], rest: 150 }, iso: { sets: 3, reps: [8, 10], rest: 90 }, cardio: 0, factor: 1.1 },
@@ -92,9 +121,13 @@ function resolveSlot(st, ids, taken) {
 
 export function generateTemplatePlan(p, key) {
   const tpl = TEMPLATES[key], st = p.stats;
+  const used = new Map();
   const days = tpl.days.map((dk, di) => {
-    const items = [];
-    for (const alts of TPL_DAYS[dk]) {
+    // Muscle areas the user picked for this day in the profile replace the ready-made exercises.
+    const muscles = areasFor(p, di);
+    let items = [];
+    if (muscles.length) items = itemsForAreas(st, muscles, rng(p.id + muscles.join() + di), used, [], tpl.perDay);
+    else for (const alts of TPL_DAYS[dk]) {
       const ex = resolveSlot(st, alts, items.map(i => i.exId));
       if (ex) items.push({ exId: ex.id, pat: ex.pat });
     }
@@ -103,7 +136,9 @@ export function generateTemplatePlan(p, key) {
       const c = resolveSlot(st, ['incline-walk', 'elliptical', 'bike', 'upright-bike'], []);
       if (c) cardio = { exId: c.id, min: 8 };
     }
-    return { key: dk, name: dayName(di), items, cardio };
+    const day = { key: dk, name: dayName(di), items, cardio, ...(muscles.length ? { muscles } : {}) };
+    sortDay(day);
+    return day;
   });
   return {
     id: uid('plan'), version: (p.plan?.version || 0) + 1, createdAt: Date.now(), fmt: PLAN_FMT,
@@ -233,7 +268,9 @@ export function generatePlan(p) {
       const c = pick(st, 'cardio', { exclude: [], used, rand });
       if (c) cardio = { exId: c.id, min: budget.cardio };
     }
-    return { key, name: dayName(di), items, cardio, ...(muscles?.length ? { muscles } : {}) };
+    const day = { key, name: dayName(di), items, cardio, ...(muscles?.length ? { muscles } : {}) };
+    sortDay(day);
+    return day;
   });
 
   // Sets are fixed, so shorten the rests (down to 45 s) if the longest day doesn't fit the session length.
@@ -294,17 +331,31 @@ const usedElsewhere = (p, dayIdx) => {
 
 // Sets the muscle areas of one day (saved in the profile) and picks new exercises for them.
 // An empty list means the app chooses again; the day's current exercises are kept.
-export function setDayAreas(p, dayIdx, areas) {
+export function setDayAreas(p, dayIdx, areas, seed = Date.now()) {
   const day = p.plan.days[dayIdx];
   p.stats.dayAreas ||= [];
   p.stats.dayAreas[dayIdx] = [...areas];
   if (areas.length) {
     day.muscles = [...areas];
-    day.items = itemsForAreas(p.stats, areas, rng(p.id + areas.join() + Date.now()), usedElsewhere(p, dayIdx), [], dayCap(p));
+    day.items = itemsForAreas(p.stats, areas, rng(p.id + areas.join() + seed), usedElsewhere(p, dayIdx), [], dayCap(p));
   } else {
     delete day.muscles;
   }
   fitDay(p, dayIdx);
+  sortDay(day);
+}
+
+// Makes every workout day follow the muscle areas chosen in the profile, and keeps each day in training order.
+// Runs at start-up and after a sync, so it is deterministic (same result on both phones).
+export function applyProfileAreas(p) {
+  if (!p.plan) return false;
+  let changed = false;
+  p.plan.days.forEach((day, d) => {
+    const want = (p.stats.dayAreas?.[d] || []).filter(k => AREAS[k]);
+    if (want.length && want.join() !== (day.muscles || []).join()) { setDayAreas(p, d, want, 'profile' + d); changed = true; }
+    if (sortDay(day)) changed = true;
+  });
+  return changed;
 }
 
 // Makes a day have exactly the profile's number of exercises: extra ones are dropped, missing ones are added.
@@ -318,6 +369,7 @@ export function fitDay(p, dayIdx) {
   const areas = day.muscles || [];
   day.items = areas.length ? itemsForAreas(p.stats, areas, rand, used, day.items, n)
     : autoItems(p.stats, day.key, (p.stats.focus || []).flatMap(f => FOCUS[f]?.pats || []), rand, used, day.items, n);
+  sortDay(day);
 }
 
 // Plans made by older versions are moved to the current format; progress (done weeks) and history are kept.
@@ -500,9 +552,17 @@ export function planProgress(plan) {
   return Math.round(Object.keys(plan.done).length / total * 100);
 }
 
+// Every exercise for the same muscle area as the item (on in Gym Setup, safe for the profile's injuries),
+// the same kind of movement first.
 export function swapOptions(stats, plan, dayIdx, itemIdx) {
   const day = plan.days[dayIdx];
   const it = day.items[itemIdx];
-  const inDay = day.items.map(i => i.exId);
-  return candidates(stats, it.pat, inDay.filter(id => id !== it.exId)).filter(e => e.id !== it.exId);
+  const area = itemArea(day, it);
+  const inDay = new Set(day.items.map(i => i.exId));
+  const inj = stats.injuries || [], no = stats.dislikes || [];
+  const pats = AREAS[area]?.pats || [];
+  return allExercises()
+    .filter(e => e.pat !== 'cardio' && !inDay.has(e.id) && isAvailable(e) && !no.includes(e.id) && !e.avoid.some(a => inj.includes(a))
+      && (areaOfEx(e) === area || pats.includes(e.pat)))
+    .sort((a, b) => (b.pat === it.pat) - (a.pat === it.pat) || (areaOfEx(b) === area) - (areaOfEx(a) === area) || a.iso - b.iso || a.name.localeCompare(b.name));
 }

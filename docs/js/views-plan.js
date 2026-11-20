@@ -1,7 +1,7 @@
 // My Plan, day preview, active workout and summary screens.
 import { state, profile, exById, photoFor, isAvailable, touchProfile, save, lastLogFor } from './store.js';
 import { esc, icon, thumb, register, sheet, closeSheet, toast, fmtClock, fmtKg, fmtDate, fmtDur, setLabel, themeButton } from './ui.js';
-import { currentWeek, planProgress, dayFocus, phaseOf, buildSession, estimateMinutes, estimateCalories, swapOptions, generatePlan, editKey, AREAS, setDayAreas, exPerDay, dayCap, warmOptions, warmPref, TEMPLATES, TPL_PHASES, generateTemplatePlan, templateExNames } from './planner.js';
+import { currentWeek, planProgress, dayFocus, phaseOf, buildSession, estimateMinutes, estimateCalories, swapOptions, generatePlan, sortDay, itemArea, editKey, AREAS, setDayAreas, exPerDay, dayCap, warmOptions, warmPref, TEMPLATES, TPL_PHASES, generateTemplatePlan, templateExNames } from './planner.js';
 import { MUSCLES, PATTERN_NAMES } from './exercises.js';
 import * as W from './workout.js';
 import { rerender } from './app.js';
@@ -121,10 +121,15 @@ export function dayView(w, d) {
   const done = plan.done[`${w}-${d}`];
   const rec = done && p.history.find(h => h.id === done);
 
+  // Grouped under a header per muscle area (the plan keeps bigger muscles first).
+  let lastArea = null;
   const items = preview.items.map((it, i) => {
     const ex = exById(it.exId);
     const avail = isAvailable(ex);
-    return `<div class="exrow">
+    const area = itemArea(day, day.items.find(x => x.exId === it.exId) || { exId: it.exId });
+    const header = area !== lastArea ? `<h4 class="exgroup">${esc(AREAS[area]?.name || '')}</h4>` : '';
+    lastArea = area;
+    return `${header}<div class="exrow">
       <a href="#/ex/${encodeURIComponent(ex.id)}">${thumb(ex, photoFor(ex.id))}</a>
       <div class="exbody">
         <a href="#/ex/${encodeURIComponent(ex.id)}" class="exname">${esc(ex.name)}</a>
@@ -259,9 +264,10 @@ register({
     const it = p.plan.days[d].items[i];
     const ex = exById(it.exId);
     const opts = swapOptions(p.stats, p.plan, d, i);
+    const area = AREAS[itemArea(p.plan.days[d], it)]?.name || '';
     sheet(`<h2>${esc(ex.name)}</h2>
       <button class="row" data-act="go" data-href="#/ex/${encodeURIComponent(ex.id)}">${icon.info}<b>How to do it</b></button>
-      <h3>Swap for another ${esc(PATTERN_NAMES[it.pat] || '')} exercise</h3>
+      <h3>Swap for another ${esc(area)} exercise <small class="muted">(${opts.length})</small></h3>
       ${opts.length ? opts.map(o => `<button class="row" data-act="swap" data-d="${d}" data-i="${i}" data-ex="${o.id}">${thumb(o, photoFor(o.id), 'sm')}<span><b>${esc(o.name)}</b><small>${esc(MUSCLES[o.m])}</small></span></button>`).join('') : '<p class="muted">No alternatives with your current gym setup.</p>'}
       <button class="row danger" data-act="remove-ex" data-d="${d}" data-i="${i}">${icon.trash}<b>Remove from this day</b></button>`);
   },
@@ -293,7 +299,10 @@ register({
   },
   'swap': (el) => {
     const p = profile();
-    p.plan.days[+el.dataset.d].items[+el.dataset.i].exId = el.dataset.ex;
+    const day = p.plan.days[+el.dataset.d];
+    const ex = exById(el.dataset.ex);
+    day.items[+el.dataset.i] = { exId: ex.id, pat: ex.pat };
+    sortDay(day);
     touchProfile(p); scheduleSync(); closeSheet(); rerender(); toast('Exercise swapped for all weeks');
   },
   'remove-ex': (el) => {
@@ -407,7 +416,7 @@ export function sessionView() {
   return {
     full: true, cls: 'session',
     html: `<div class="sess-head ${resting ? 'resting' : ''}">
-        <div class="sess-top"><button class="iconbtn inv" data-act="go" data-href="#/plan">${icon.back}</button><span>${esc(s.title)} · <b data-t="elapsed">${fmtClock(W.elapsed())}</b></span><button class="iconbtn inv" data-act="sess-options">${icon.dots}</button></div>
+        <div class="sess-top"><button class="iconbtn inv" data-act="go" data-href="#/plan">${icon.back}</button><span>${esc(s.title)} · <b data-t="elapsed">${fmtClock(W.elapsed())}</b></span><span class="hdr-btns"><a class="iconbtn inv" href="#/timer" aria-label="Timer">${icon.timer}</a><button class="iconbtn inv" data-act="sess-options">${icon.dots}</button></span></div>
         ${head}
       </div>
       <div class="sess-body">

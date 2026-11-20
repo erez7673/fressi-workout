@@ -6,7 +6,7 @@ import { EQUIPMENT, EQUIP_CATS } from './equipment.js';
 import { POSITIONS, GRIPS, FEEL, matchExercises, customExercise, identifyWithAI } from './identify.js';
 import { lineChart } from './charts.js';
 import { EQUIP_PIC } from './pictures.js';
-import { generatePlan, dayFocus, sessionBudget, warmPref, dayCap } from './planner.js';
+import { generatePlan, dayFocus, sessionBudget, warmPref, dayCap, sortDay } from './planner.js';
 import { rerender } from './app.js';
 import { scheduleSync } from './sync.js';
 
@@ -126,6 +126,7 @@ register({
       return;
     } else {
       day.items.push({ exId: ex.id, pat: ex.pat });
+      sortDay(day);
       toast(`Added to ${day.name} (${day.items.length} of ${dayCap(p)})`);
     }
     touchProfile(p); scheduleSync(); closeSheet(); rerender();
@@ -133,6 +134,7 @@ register({
   'add-to-day-replace': (el) => {
     const p = profile(); const ex = exById(el.dataset.id); const day = p.plan.days[+el.dataset.d];
     day.items[+el.dataset.i] = { exId: ex.id, pat: ex.pat };
+    sortDay(day);
     touchProfile(p); scheduleSync(); closeSheet(); rerender();
     toast(`${ex.name} is now in ${day.name}`);
   },

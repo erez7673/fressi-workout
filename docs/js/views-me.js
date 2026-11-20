@@ -66,11 +66,11 @@ function readForm() {
 }
 
 // After saving without a rebuild: apply changed muscle areas, then give every day the chosen number of exercises.
-function applyDayChanges(p, oldAreas) {
+function applyDayChanges(p) {
   if (!p.plan) return;
   p.plan.days.forEach((day, d) => {
-    const want = p.stats.dayAreas?.[d] || [];
-    if (want.join() !== (oldAreas[d] || []).join()) setDayAreas(p, d, want);
+    const want = (p.stats.dayAreas?.[d] || []).filter(k => AREAS[k]);
+    if (want.join() !== (day.muscles || []).join()) setDayAreas(p, d, want);
     else fitDay(p, d);
   });
 }
@@ -93,11 +93,10 @@ register({
     p.name = d.name;
     const oldW = p.stats.weight;
     if (el.dataset.rebuild && p.plan && Object.keys(p.plan.done).length && !confirm('Rebuilding restarts your plan at week 1 (history is kept). Continue?')) return;
-    const oldAreas = (p.plan?.days || []).map((_, i) => areasFor(p, i));
     p.stats = { ...p.stats, ...d.stats };
     if (d.stats.weight !== oldW) p.bodyweight.push({ date: today(), kg: d.stats.weight });
     if (el.dataset.rebuild) p.plan = generatePlan(p);
-    else applyDayChanges(p, oldAreas);
+    else applyDayChanges(p);
     touchProfile(p); scheduleSync();
     toast('Saved'); location.hash = el.dataset.rebuild ? '#/plan' : '#/profile';
   },

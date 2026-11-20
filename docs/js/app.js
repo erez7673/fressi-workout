@@ -1,12 +1,13 @@
 // App shell: router, bottom navigation, event delegation and the timer loop.
 import { state, profile, touchProfile } from './store.js';
-import { upgradePlan, dayCap } from './planner.js';
+import { upgradePlan, dayCap, applyProfileAreas } from './planner.js';
 import { actions, icon, $, closeSheet, fmtClock, applyTheme } from './ui.js';
 import * as W from './workout.js';
 import { syncNow, syncEnabled, scheduleSync } from './sync.js';
 import { planView, dayView, sessionView, summaryView } from './views-plan.js';
 import { libraryView, exerciseView, gymView, identifyView } from './views-gym.js';
 import { onboardView, profileView, progressView } from './views-me.js';
+import { timerView, timerTick } from './views-timer.js';
 
 const ROUTES = [
   [/^#?\/?$/, () => planView()],
@@ -17,6 +18,7 @@ const ROUTES = [
   [/^#\/exercises$/, () => libraryView()],
   [/^#\/ex\/(.+)$/, (m) => exerciseView(decodeURIComponent(m[1]))],
   [/^#\/gym$/, () => gymView()],
+  [/^#\/timer$/, () => timerView()],
   [/^#\/identify$/, () => identifyView()],
   [/^#\/progress$/, () => progressView()],
   [/^#\/profile$/, () => profileView()],
@@ -27,6 +29,7 @@ const TABS = [
   ['#/plan', 'My Plan', icon.plan],
   ['#/exercises', 'Exercises', icon.list],
   ['#/gym', 'Gym', icon.gym],
+  ['#/timer', 'Timer', icon.timer],
   ['#/progress', 'Progress', icon.chart],
   ['#/profile', 'Profile', icon.user],
 ];
@@ -72,6 +75,7 @@ function renderLiveBar(hash) {
 
 // ── Timer loop ──
 setInterval(() => {
+  timerTick();
   const ev = W.tick();
   if (ev === 'rest-done' || ev === 'hold-done') { if (location.hash === '#/session') rerender(); }
   const s = state.session;
@@ -132,6 +136,8 @@ function upgradePlans() {
     let c = upgradePlan(p);
     // No day may have more exercises than set in the profile.
     for (const day of p.plan?.days || []) if (day.items.length > dayCap(p)) { day.items = day.items.slice(0, dayCap(p)); c = true; }
+    // Workout days follow the muscle areas chosen under Profile → Edit, bigger muscles first.
+    if (applyProfileAreas(p)) c = true;
     if (c) { touchProfile(p); changed = true; }
   }
   if (changed) scheduleSync();

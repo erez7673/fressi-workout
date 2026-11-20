@@ -24,6 +24,7 @@ export const icon = {
   plus: P('<path d="M12 5v14M5 12h14"/>', 'stroke-width="2.5"'),
   x: P('<path d="M18 6L6 18M6 6l12 12"/>', 'stroke-width="2.5"'),
   fire: P('<path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-7 1 2 2 3 3 3 0-3-1-5 0-8z" fill="currentColor" stroke="none"/>'),
+  timer: P('<circle cx="12" cy="14" r="8"/><path d="M12 10v4l2.5 1.5M10 2h4M12 2v4M19 5l1.5 1.5"/>'),
   clock: P('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M10 2h4"/>'),
   swap: P('<path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>'),
   sync: P('<path d="M21 12a9 9 0 0 1-15 6.7L3 16M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M3 21v-5h5"/>'),

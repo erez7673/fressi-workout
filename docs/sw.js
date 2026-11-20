@@ -1,11 +1,11 @@
 // Offline support: network first (so updates show up straight away), cached copy when offline.
-const CACHE = 'fressi-v2';
+const CACHE = 'fressi-v3';
 const PICS = 'fressi-pics-v1';
 const FILES = [
   './', './index.html', './manifest.webmanifest', './css/app.css',
   './js/app.js', './js/store.js', './js/ui.js', './js/exercises.js', './js/equipment.js', './js/pictures.js',
   './js/planner.js', './js/workout.js', './js/identify.js', './js/charts.js', './js/sync.js',
-  './js/views-plan.js', './js/views-gym.js', './js/views-me.js',
+  './js/views-plan.js', './js/views-gym.js', './js/views-me.js', './js/views-timer.js',
   './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png',
 ];
 

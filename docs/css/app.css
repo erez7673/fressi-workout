@@ -345,3 +345,18 @@ body:has(.cta) #livebar { bottom: calc(var(--nav-h) + env(safe-area-inset-bottom
   .round { width: 54px; height: 54px; }
   .three { grid-template-columns: 1fr 1fr; }
 }
+
+/* Stand-alone timer */
+.tabs2 { display: flex; gap: 6px; background: var(--chip); padding: 4px; border-radius: 14px; margin: 4px 0 14px; }
+.tabs2 button { flex: 1; padding: 10px; border-radius: 11px; font-weight: 700; color: var(--ink2); }
+.tabs2 button.on { background: var(--card); color: var(--ink); box-shadow: var(--shadow); }
+.timer-card { background: var(--head); color: var(--head-ink); border-radius: var(--radius); padding: 24px 18px; text-align: center; }
+.timer-card .hd-btns { justify-content: center; }
+.timer-card .pillbtn[disabled] { opacity: .4; }
+.choices.grid3 { grid-template-columns: 1fr 1fr 1fr; }
+.choices.grid3 .choice { text-align: center; padding: 14px 8px; }
+.muted.small svg { width: 14px; height: 14px; vertical-align: -2px; }
+#nav a span { font-size: 11px; }
+/* Muscle-area headers in a day's exercise list */
+.exgroup { font-size: 17px; font-weight: 800; color: var(--blue); margin: 18px 0 4px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.exgroup:first-child { margin-top: 0; }
