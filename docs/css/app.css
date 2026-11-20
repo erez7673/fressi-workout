@@ -362,6 +362,9 @@ body:has(.cta) #livebar { bottom: calc(var(--nav-h) + env(safe-area-inset-bottom
 .exgroup:first-child { margin-top: 0; }
 /* Exercise animations (anim.js) */
 .anim { margin: 0 0 12px; background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 10px 12px 12px; }
+.anim.vid { background: #1c1c1e; }
+.anim.vid video { display: block; width: 100%; max-width: 420px; aspect-ratio: 1; margin: 0 auto; border-radius: 10px; background: #1c1c1e; }
+.anim.vid .legend { color: #c7c7cc; }
 .anim svg { display: block; width: 100%; max-width: 420px; margin: 0 auto; }
 .anim line { stroke-linecap: round; fill: none; }
 .anim .eq { stroke: var(--ink3); }

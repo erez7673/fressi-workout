@@ -165,7 +165,11 @@ const DEFS = {
   },
 };
 
-export const hasAnim = (id) => !!DEFS[id];
+// Exercises with a 3D video clip in media/anim/<id>-m.mp4 and <id>-f.mp4 (male and female mannequin).
+// A clip replaces the drawn animation; the profile's sex picks which one is shown.
+const VIDEOS = new Set(['leg-press']);
+
+export const hasAnim = (id) => VIDEOS.has(id) || !!DEFS[id];
 
 // Where the effort is in the loop: push (1.1 s), hold, return slowly (1.6 s), pause.
 const ease = (x) => 0.5 - 0.5 * Math.cos(Math.PI * x);
@@ -183,9 +187,16 @@ export function svgFor(id, ex, p) {
 }
 
 // Markup for an exercise's animation and muscle legend. Call startAnims() after it is on the page.
-export function animHTML(ex) {
+export function animHTML(ex, sex) {
   if (!hasAnim(ex.id)) return '';
   const leg = (cls, list) => list.map(m => `<span><i class="${cls}"></i>${esc(MUSCLES[m] || m)}</span>`).join('');
+  if (VIDEOS.has(ex.id)) {
+    const f = `media/anim/${ex.id}-${sex === 'male' ? 'm' : 'f'}`;
+    return `<figure class="anim vid">
+      <video src="${f}.mp4" poster="${f}.jpg" autoplay muted loop playsinline preload="auto" aria-label="${esc(ex.name)} animation"></video>
+      <figcaption><span class="legend">${leg('pri', [ex.m])}${leg('sec', ex.s || [])}</span></figcaption>
+    </figure>`;
+  }
   return `<figure class="anim" data-anim="${ex.id}">
       <svg viewBox="0 0 260 220" role="img" aria-label="${esc(ex.name)} animation">${svgFor(ex.id, ex, 0)}</svg>
       <figcaption><b data-anim-word>${esc(DEFS[ex.id].words[0])}</b>

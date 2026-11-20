@@ -80,7 +80,7 @@ export function exerciseView(id) {
       ${machines.length ? `<p class="muted">Your machine: ${machines.map(m => esc([m.name, m.brand, m.model].filter(Boolean).join(' · '))).join(', ')}</p>` : ''}
       ${avoid.length ? `<div class="card warncard">⚠️ Marked as risky for your ${avoid.join(', ')} – go light or swap it.</div>` : ''}
       <h3>How to do it</h3>
-      ${hasAnim(ex.id) ? `${animHTML(ex)}
+      ${hasAnim(ex.id) ? `${animHTML(ex, p.stats.sex)}
         <details class="card moves-card"><summary><b>Written steps</b></summary><ol class="steps">${ex.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol></details>`
       : `<ol class="steps">${ex.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>`}
       ${ex.tip ? `<div class="card tip">💡 ${esc(ex.tip)}</div>` : ''}

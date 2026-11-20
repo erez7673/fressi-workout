@@ -30,6 +30,7 @@ self.addEventListener('fetch', (e) => {
     return;
   }
   if (url.origin !== location.origin) return; // sync calls go straight to Google
+  if (url.pathname.includes('/media/')) return; // video clips: Safari streams them with range requests, which a cache can't answer
   e.respondWith(
     fetch(e.request, { cache: 'no-cache' }).then(res => {
       if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); }
