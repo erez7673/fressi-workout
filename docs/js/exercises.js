@@ -340,6 +340,9 @@ export const EXERCISES = [
   E('ab-machine', 'Ab Crunch Machine', 'ab-machine', 'core', 'core', {
     pos: 'seated', grip: 'handles', mot: 'core-flex', load: 0.3, inc: 5,
     steps: ['Adjust the seat, hold the handles or place arms on the pads.', 'Curl your torso forward and down.', 'Squeeze your abs.', 'Return slowly.'] }),
+  E('rotary-torso', 'Rotary Torso Machine', 'rotary-torso', 'core', 'core', {
+    pos: 'seated', grip: 'handles', mot: 'core-rotate', iso: true, avoid: ['lowerback'], load: 0.25, inc: 5,
+    steps: ['Sit facing the handles and set the start angle to one side.', 'Brace your legs against the pads and hold the handles.', 'Turn your upper body slowly to the other side.', 'Return slowly. Do all reps, then switch sides.'], tip: 'Move slowly and keep the range comfortable for your back.' }),
   E('farmer-carry', 'Farmer\'s Carry', 'dumbbells', 'core', 'core', {
     s: ['traps', 'forearms'], pos: 'standing', grip: 'dumbbell', mot: 'carry', unit: 'sec', perHand: true, load: 0.35, inc: 2,
     steps: ['Pick up heavy dumbbells, one in each hand.', 'Stand tall, shoulders back.', 'Walk with short, steady steps for the time shown.', 'Put the weights down carefully.'] }),
@@ -357,9 +360,12 @@ export const EXERCISES = [
   E('stair-climber', 'Stair Climber', 'stair-climber', 'cardio', 'cardio', {
     s: ['glutes'], pos: 'standing', grip: 'none', mot: 'cardio', unit: 'min', avoid: ['knee'],
     steps: ['Step on and start at a slow speed.', 'Stand tall; hold the rails lightly only for balance.', 'Step with your whole foot on each stair.', 'Increase speed gradually.'] }),
-  E('bike', 'Exercise Bike', 'bike', 'cardio', 'cardio', {
+  E('bike', 'Recumbent Bike', 'bike', 'cardio', 'cardio', {
     pos: 'seated', grip: 'handles', mot: 'cardio', unit: 'min',
     steps: ['Adjust the seat so your knee is slightly bent at the bottom.', 'Start easy for 2 minutes.', 'Then 30 s hard / 60 s easy, or a steady moderate pace.', 'Cool down easy for the last 2 minutes.'], tip: 'Easiest on the knees.' }),
+  E('upright-bike', 'Upright Bike', 'bike-upright', 'cardio', 'cardio', {
+    pos: 'seated', grip: 'handles', mot: 'cardio', unit: 'min',
+    steps: ['Adjust the seat so your knee is slightly bent at the bottom.', 'Start easy for 2 minutes.', 'Then 30 s hard / 60 s easy, or a steady moderate pace.', 'Cool down easy for the last 2 minutes.'] }),
   E('rower', 'Rowing Machine', 'rower', 'cardio', 'cardio', {
     s: ['back'], pos: 'seated', grip: 'handles', mot: 'cardio', unit: 'min', avoid: ['lowerback'],
     steps: ['Strap your feet in, grab the handle.', 'Push with your legs first, then lean back, then pull the arms.', 'Return in reverse: arms, body, legs.', 'Keep a steady rhythm.'] }),

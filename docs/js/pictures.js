@@ -1,5 +1,6 @@
-// Equipment pictures from the gym80 product catalogue (https://gym80.de/en/product/) and, for cardio,
-// the Matrix Fitness catalogue (https://world.matrixfitness.com/eng/cardio/catalog).
+// Equipment pictures from the gym80 product catalogue (https://gym80.de/en/product/) and, for the Matrix
+// machines identified in the gym photos, the Matrix Fitness catalogue
+// (https://world.matrixfitness.com/eng/strength/catalog and /eng/cardio/catalog).
 // Images are loaded from the makers' sites (not copied into this app) and cached by the service worker for offline use.
 
 const U = 'https://gym80.de/wp-content/uploads/';
@@ -15,20 +16,16 @@ export const EQUIP_PIC = {
   'bench-flat': P('4005', 'Flat Bench', '2025/07/4005_basic_flat_bench_NC.webp'),
   'bench-adj': P('4103', 'Adjustable Bench', '2025/07/4103_basic_press_bench_adjustable_NC.webp'),
   rack: P('80A00005', 'Power Rack', '2026/03/gym80_80a00005_power_rack_NC_overview.webp'),
-  smith: P('5201', 'Multi-Power (Smith) Station', '2026/03/gym80_5201_multi_power_station_NC_overview.webp'),
   preacher: P('4093', 'Seated Preacher Curl Bench', '2025/07/4093_basic_scott_curl_sitzend_NC.webp'),
   'cable-single': P('4134', 'Universal Cable Pulley', '2025/07/4134_universal_seilzug_NC.webp'),
   'cable-crossover': P('4004', 'Cable Crossover', '2025/07/4004_kabelzug_crossover_NC.webp'),
   'lat-pulldown': P('4116', 'Lat Pulldown Station', '2025/07/4116_rueckenzugstation_NC.webp'),
   'cable-row': P('4016', 'Seated Cable Row Station', '2025/07/4016_ruderstation_NC.webp'),
   'chest-press-machine': P('3016', 'Chest Press', '2025/07/3016_brustpresse_NC.webp'),
-  'shoulder-press-machine': P('3032', 'Shoulder Press', '2025/07/3032_schulterpresse_NC.webp'),
   'pec-deck': P('3022', 'Butterfly (Pec Deck)', '2025/07/3022_butterfly_NC.webp'),
   'row-machine': P('3040', 'Rowing Machine', '2025/07/3040_rudermaschine_NC.webp'),
   'leg-extension': P('3001', 'Leg Extension', '2026/03/3001_beinbeuger_NC-1.webp'),
   'leg-curl': P('3003', 'Seated Leg Curl', '2026/03/3003_beinbeuger_sitzend_NC.webp'),
-  abductor: P('3028', 'Abductor Machine', '2025/07/3028_abduktionsmaschine_NC.webp'),
-  adductor: P('3029', 'Adductor Machine', '2025/07/3029_addunktionsmaschine_NC.webp'),
   'triceps-machine': P('3011', 'Triceps Machine', '2025/07/3011_trizepsmaschine_NC.webp'),
   'ab-machine': P('3037', 'Abdominal Machine', '2026/03/gym80_3037_abdominal_machine_NC_overview.webp'),
   'calf-machine': P('4026', 'Seated Calf Raise', '2026/03/gym80_4026_pure_kraft_seated_calf_raise_NC_overview.webp'),
@@ -39,16 +36,25 @@ export const EQUIP_PIC = {
   'hack-squat': P('4159N', 'Pure Kraft Hack Squat', '2026/03/gym80_4159n_pure_kraft_hack_squat_NC_overview.webp'),
   'hip-thrust-machine': P('4352', 'Pure Kraft Booty Booster', '2025/07/4352_pure_kraft_booty_booster_NC.webp'),
   'pullup-bar': P('4031', 'Knee Raise + Pull-Up Bar', '2025/07/4031_basic_beinhebegeraet_mit_klimmyugstange_NC.webp'),
-  'dip-station': P('3017', 'Assisted Chin / Dip Machine', '2026/03/gym80_3017_kneeling-chinning-dipping_machine_NC_overview.webp'),
   'captains-chair': P('4046', 'Knee Raise Station', '2026/03/gym80_4046_basic_abdominal_flexor_NC_overview.webp'),
   'back-extension': P('4119', '45° Back Extension', '2025/07/4119_basic_45-grad_rueckenstrecker_NC.webp'),
   trx: P('9253', 'Sling Trainer', '2025/07/9253_Slingtrainer_NC.webp'),
   none: P('9690', 'Exercise Mat', '2025/07/9690_matte_NC.webp'),
 
+  // Matrix strength machines seen in the gym.
+  'shoulder-press-machine': M('Versa Converging Shoulder Press', 'ebd16aba92ab340c8965158d5ea752deec16374a'),
+  abductor: M('Versa Hip Abductor / Adductor', '91803f0677a006f01c2a6ca3f0f24feae60d5b89'),
+  adductor: M('Versa Hip Abductor / Adductor', '91803f0677a006f01c2a6ca3f0f24feae60d5b89'),
+  'rotary-torso': M('Ultra Rotary Torso', '7abba6f04271b11d85d6a12a0428cb05bf53bd80'),
+  'dip-station': M('Aura Dip / Chin Assist', '0c2ef8e6ca07d0da8cee90ca3557e293c19996e3'),
+  smith: M('Magnum Smith Machine', 'd541eb5a3aeb4364e60163091a65adc5ce0dcfd3'),
+
+  // Matrix cardio seen in the gym.
   treadmill: M('Performance Treadmill', '94e0531169335e9cd5930e9cf3c57f1429735993'),
   elliptical: M('Performance Elliptical', 'e52f7b7452c071429be273eacc8467c39cd05957'),
   'stair-climber': M('Performance ClimbMill', '49d898933f41bfaf4ce8920093fe0d0021d018c8'),
-  bike: M('Performance Recumbent Cycle', 'e9b1646e3b26fac90f47cb1e0b837faed5f3b3bb'),
+  bike: M('Lifestyle Recumbent Cycle', 'ebd223675b23e1775acc93846a493e52b66a892c'),
+  'bike-upright': M('Lifestyle Upright Cycle', 'c1d36a3478e85cd2289e5a16430b69a89da9b5d1'),
   rower: M('Rower', '57651c9b1b4a1637fd114f74275ef1aec33067a6'),
 };
 

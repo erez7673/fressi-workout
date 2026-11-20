@@ -100,7 +100,7 @@ export function generateTemplatePlan(p, key) {
     }
     let cardio = null;
     if (st.cardio) {
-      const c = resolveSlot(st, ['incline-walk', 'elliptical', 'bike'], []);
+      const c = resolveSlot(st, ['incline-walk', 'elliptical', 'bike', 'upright-bike'], []);
       if (c) cardio = { exId: c.id, min: 8 };
     }
     return { key: dk, name: dayName(di), items, cardio };
