@@ -178,6 +178,9 @@ const VIDEOS = new Set([
   // Batch 3
   'db-shoulder-press', 'smith-ohp', 'bb-ohp', 'arnold-press', 'db-lateral', 'cable-lateral',
   'face-pull', 'db-rear-fly', 'close-pulldown', 'assisted-chin',
+  // Batch 4
+  'reverse-pec-deck', 'pullup', 'straight-arm-pulldown', 'crossover-row', 'plate-row',
+  'db-row', 'incline-db-row', 'bb-row', 'trx-row', 'db-shrug',
 ]);
 
 export const hasAnim = (id) => VIDEOS.has(id) || !!DEFS[id];
