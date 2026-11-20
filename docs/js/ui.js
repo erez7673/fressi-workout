@@ -33,7 +33,7 @@ export const icon = {
   search: P('<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>'),
 };
 
-// Exercise thumbnail: the user's own photo if any, otherwise the gym80 picture of the equipment.
+// Exercise thumbnail: the user's own photo if any, otherwise the maker's picture of the equipment.
 // Cardio (Matrix machines) and offline-without-cache fall back to a plain line icon.
 const CARDIO_ICON = P('<path d="M3 12h4l2-5 4 10 2-5h6"/>');
 export function thumb(ex, photo, size = 'md') {

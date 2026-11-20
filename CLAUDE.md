@@ -67,7 +67,7 @@ Deploy = commit and push to `main`; GitHub Pages is live about 30 s later. On ph
 - To add a clip: put both files in `docs/media/anim/` and add the exercise id to `VIDEOS`.
 
 **Equipment pictures (`pictures.js`).**
-- Pictures are **hotlinked, not stored in the repo**: gym80 from `gym80.de/wp-content/uploads/…webp` (`P()`), Matrix strength and cardio machines from `assets.jhtbrand.co/files/product/<hash>/` (`M(name, hash)`). Use only pictures of machines confirmed to be in the gym.
+- Pictures are **hotlinked, not stored in the repo**: gym80 from `gym80.de/wp-content/uploads/…webp` (`P()`), Matrix strength and cardio machines from `assets.jhtbrand.co/files/product/<hash>/` (`M(name, hash)`). Matrix pictures are used for machines confirmed in the gym, and also as black stand-ins for gym80 weight-stack and cable machines, because gym80 only pictures those in gold (the user doesn't want gold machines shown).
 - `EQUIP_PIC` maps equipment id → picture. `EX_PIC` holds per-exercise overrides. `picFor(ex)` uses the first equipment token of `ex.eq`.
 - `thumb()` in `ui.js` shows, in order of preference: the user's own machine photo, then the maker's picture, then a line icon (`onerror` removes a broken image).
 - gym80 product data is available from the WP REST API at `/wp-json/wp/v2/fitness_equipment`, but it has no images; image URLs have to be taken from the product pages.

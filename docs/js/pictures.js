@@ -1,6 +1,6 @@
-// Equipment pictures from the gym80 product catalogue (https://gym80.de/en/product/) and, for the Matrix
-// machines identified in the gym photos, the Matrix Fitness catalogue
-// (https://world.matrixfitness.com/eng/strength/catalog and /eng/cardio/catalog).
+// Equipment pictures from the gym80 product catalogue (https://gym80.de/en/product/) and the Matrix Fitness
+// catalogue (https://world.matrixfitness.com/eng/strength/catalog and /eng/cardio/catalog): Matrix for the
+// machines identified in the gym photos, and for gym80 machines whose only pictures are gold.
 // Images are loaded from the makers' sites (not copied into this app) and cached by the service worker for offline use.
 
 const U = 'https://gym80.de/wp-content/uploads/';
@@ -17,17 +17,6 @@ export const EQUIP_PIC = {
   'bench-adj': P('4103', 'Adjustable Bench', '2025/07/4103_basic_press_bench_adjustable_NC.webp'),
   rack: P('80A00005', 'Power Rack', '2026/03/gym80_80a00005_power_rack_NC_overview.webp'),
   preacher: P('4093', 'Seated Preacher Curl Bench', '2025/07/4093_basic_scott_curl_sitzend_NC.webp'),
-  'cable-single': P('4134', 'Universal Cable Pulley', '2025/07/4134_universal_seilzug_NC.webp'),
-  'cable-crossover': P('4004', 'Cable Crossover', '2025/07/4004_kabelzug_crossover_NC.webp'),
-  'lat-pulldown': P('4116', 'Lat Pulldown Station', '2025/07/4116_rueckenzugstation_NC.webp'),
-  'cable-row': P('4016', 'Seated Cable Row Station', '2025/07/4016_ruderstation_NC.webp'),
-  'chest-press-machine': P('3016', 'Chest Press', '2025/07/3016_brustpresse_NC.webp'),
-  'pec-deck': P('3022', 'Butterfly (Pec Deck)', '2025/07/3022_butterfly_NC.webp'),
-  'row-machine': P('3040', 'Rowing Machine', '2025/07/3040_rudermaschine_NC.webp'),
-  'leg-extension': P('3001', 'Leg Extension', '2026/03/3001_beinbeuger_NC-1.webp'),
-  'leg-curl': P('3003', 'Seated Leg Curl', '2026/03/3003_beinbeuger_sitzend_NC.webp'),
-  'triceps-machine': P('3011', 'Triceps Machine', '2025/07/3011_trizepsmaschine_NC.webp'),
-  'ab-machine': P('3037', 'Abdominal Machine', '2026/03/gym80_3037_abdominal_machine_NC_overview.webp'),
   'calf-machine': P('4026', 'Seated Calf Raise', '2026/03/gym80_4026_pure_kraft_seated_calf_raise_NC_overview.webp'),
   'plate-chest-press': P('4326', 'Pure Kraft Chest Press Dual', '2025/07/4326_pure_kraf_brustmaschine_dual_NC.webp'),
   'plate-incline-press': P('4329N', 'Pure Kraft Incline Press Dual', '2025/07/4329n_pure_kraft_schraegbank_dual_NC.webp'),
@@ -40,6 +29,19 @@ export const EQUIP_PIC = {
   'back-extension': P('4119', '45° Back Extension', '2025/07/4119_basic_45-grad_rueckenstrecker_NC.webp'),
   trx: P('9253', 'Sling Trainer', '2025/07/9253_Slingtrainer_NC.webp'),
   none: P('9690', 'Exercise Mat', '2025/07/9690_matte_NC.webp'),
+
+  // Matrix stand-ins for gym80 weight-stack and cable machines, which gym80 only pictures in gold.
+  'cable-single': M('Adjustable Pulley', '17182a1a18eaaf9ad84baeeda5ba6cae1217a7d9'),
+  'cable-crossover': M('Adjustable Cable Crossover', 'be1abc168ad264a97876671057b88fb0d588fcdd'),
+  'lat-pulldown': M('Lat Pulldown', '72584368af40286ff583f9ea5471017314d2757a'),
+  'cable-row': M('Low Row', '3df8ce979c81c3796dc940c7838a5be8fae95c84'),
+  'chest-press-machine': M('Versa Converging Chest Press', '9c3d2c39f368bc9d009fc78b6834596cec5f5c45'),
+  'pec-deck': M('Versa Pec Fly / Rear Delt', '7227904bc0af457a3a52e59f029fdd22415cfdc3'),
+  'row-machine': M('Versa Diverging Seated Row', 'd5a89e258dd4eb72f2a9c71a14a20da698411572'),
+  'leg-extension': M('Versa Leg Extension', 'a7d104d4af2333930e37cac45cf8a86815c36020'),
+  'leg-curl': M('Versa Seated Leg Curl', '46baecb63609de53c3203c3c5dd15aa86979dda8'),
+  'triceps-machine': M('Versa Triceps Press', '2ccecf93692f804441117c308535b535d3059eb0'),
+  'ab-machine': M('Versa Abdominal', 'fa63a08094daa680026bd741a2f4958797da27f4'),
 
   // Matrix strength machines seen in the gym.
   'shoulder-press-machine': M('Versa Converging Shoulder Press', 'ebd16aba92ab340c8965158d5ea752deec16374a'),
@@ -61,7 +63,7 @@ export const EQUIP_PIC = {
 // Exercises where a different product shows the movement better than the first piece of equipment.
 const EX_PIC = {
   'bb-bench': P('4097', 'Bench Press Bench', '2025/07/4097_basic_press_bench_NC.webp'),
-  'reverse-pec-deck': P('3025', 'Butterfly Reverse', '2025/07/3025_butterfly_reverse_NC.webp'),
+  'reverse-pec-deck': EQUIP_PIC['pec-deck'],
   'preacher-curl': EQUIP_PIC.preacher,
   'bench-dip': EQUIP_PIC['bench-flat'],
   'stepup': EQUIP_PIC['bench-flat'],
