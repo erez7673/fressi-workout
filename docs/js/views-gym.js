@@ -6,6 +6,7 @@ import { EQUIPMENT, EQUIP_CATS } from './equipment.js';
 import { POSITIONS, GRIPS, FEEL, matchExercises, customExercise, identifyWithAI } from './identify.js';
 import { lineChart } from './charts.js';
 import { EQUIP_PIC } from './pictures.js';
+import { hasAnim, animHTML, startAnims } from './anim.js';
 import { generatePlan, dayFocus, sessionBudget, warmPref, dayCap, sortDay } from './planner.js';
 import { rerender } from './app.js';
 import { scheduleSync } from './sync.js';
@@ -79,7 +80,9 @@ export function exerciseView(id) {
       ${machines.length ? `<p class="muted">Your machine: ${machines.map(m => esc([m.name, m.brand, m.model].filter(Boolean).join(' · '))).join(', ')}</p>` : ''}
       ${avoid.length ? `<div class="card warncard">⚠️ Marked as risky for your ${avoid.join(', ')} – go light or swap it.</div>` : ''}
       <h3>How to do it</h3>
-      <ol class="steps">${ex.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
+      ${hasAnim(ex.id) ? `${animHTML(ex)}
+        <details class="card moves-card"><summary><b>Written steps</b></summary><ol class="steps">${ex.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol></details>`
+      : `<ol class="steps">${ex.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>`}
       ${ex.tip ? `<div class="card tip">💡 ${esc(ex.tip)}</div>` : ''}
       ${ex.assist ? '<div class="card tip">On assisted machines the weight helps you – more kg = easier. The app lowers it as you get stronger.</div>' : ''}
       ${ex.perHand ? '<p class="muted">Weight shown is per dumbbell.</p>' : ''}
@@ -90,6 +93,7 @@ export function exerciseView(id) {
         <button class="btn ${disliked ? 'danger' : ''}" data-act="dislike" data-id="${ex.id}">👎 ${disliked ? 'Avoided' : 'Avoid it'}</button>
       </div>
       <p class="muted small">Likes and dislikes are used next time you rebuild your plan.</p>`,
+    after: () => startAnims(exById),
   };
 }
 

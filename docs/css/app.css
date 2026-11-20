@@ -360,3 +360,29 @@ body:has(.cta) #livebar { bottom: calc(var(--nav-h) + env(safe-area-inset-bottom
 /* Muscle-area headers in a day's exercise list */
 .exgroup { font-size: 17px; font-weight: 800; color: var(--blue); margin: 18px 0 4px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
 .exgroup:first-child { margin-top: 0; }
+/* Exercise animations (anim.js) */
+.anim { margin: 0 0 12px; background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 10px 12px 12px; }
+.anim svg { display: block; width: 100%; max-width: 420px; margin: 0 auto; }
+.anim line { stroke-linecap: round; fill: none; }
+.anim .eq { stroke: var(--ink3); }
+.anim .eq-fill { fill: var(--ink3); }
+.anim .eq-box { fill: none; stroke: var(--ink3); stroke-width: 3; }
+.anim .plate { fill: var(--ink3); opacity: .7; }
+.anim .plate-big { fill: none; stroke: var(--ink3); stroke-width: 6; }
+.anim .pad { stroke: var(--ink3); opacity: .45; }
+.anim .pad-fill { fill: var(--ink3); opacity: .6; }
+.anim .skin { stroke: var(--ink2); }
+.anim .skin-fill { fill: var(--ink2); }
+.anim .far { stroke: var(--ink2); opacity: .4; }
+.anim .far-fill { fill: var(--ink2); opacity: .4; }
+.anim .mus { stroke: #ff4b3a; }
+.anim .mus.dot { fill: #ff4b3a; stroke: none; }
+.anim .mus.sec { stroke: #ff9f5a; opacity: .8; }
+.anim .mus.sec.dot { fill: #ff9f5a; }
+.anim .mus.pri { animation: musPulse 1.7s ease-in-out infinite; }
+@keyframes musPulse { 50% { opacity: .6; } }
+.anim figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px 12px; margin-top: 6px; font-size: 14px; }
+.anim .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; color: var(--ink2); }
+.anim .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+.anim .legend i.pri { background: #ff4b3a; }
+.anim .legend i.sec { background: #ff9f5a; }
