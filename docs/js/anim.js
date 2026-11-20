@@ -167,7 +167,12 @@ const DEFS = {
 
 // Exercises with a 3D video clip in media/anim/<id>-m.mp4 and <id>-f.mp4 (male and female mannequin).
 // A clip replaces the drawn animation; the profile's sex picks which one is shown.
-const VIDEOS = new Set(['leg-press']);
+const VIDEOS = new Set([
+  'leg-press',
+  // Batch 1
+  'machine-chest-press', 'machine-shoulder-press', 'pec-deck', 'lat-pulldown', 'seated-cable-row', 'machine-row',
+  'leg-extension', 'leg-curl', 'hack-squat', 'hip-thrust-machine',
+]);
 
 export const hasAnim = (id) => VIDEOS.has(id) || !!DEFS[id];
 
