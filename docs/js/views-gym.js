@@ -14,7 +14,7 @@ import { scheduleSync } from './sync.js';
 const eqThumb = (id) => {
   const pic = EQUIP_PIC[id];
   return pic
-    ? `<span class="thumb pic sm"><img src="${pic.url}" alt="${esc(pic.brand + ' ' + pic.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></span>`
+    ? `<span class="thumb pic sm zoomable" data-act="pic-zoom"><img src="${pic.url}" alt="${esc(pic.brand + ' ' + pic.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></span>`
     : `<span class="thumb sm"><span class="ico">${icon.gym}</span></span>`;
 };
 const eqName = (id) => EQUIPMENT.find(e => e.id === id)?.name || state.gym.machines.find(m => m.id === id)?.name || id;
@@ -167,7 +167,7 @@ export function gymView() {
       <p class="muted small">Items marked <span class="pill warnpill">confirm</span> weren't visible in the gym photos – tick them on or off next time you're there. The plan only uses items that are on.</p>
       ${machines.length ? `<h3>My machines</h3><div class="exlist">${machines.map(m => {
         const exs = (m.exerciseIds || []).map(exById).filter(Boolean);
-        return `<div class="exrow">${m.photo ? `<div class="thumb md"><img src="${m.photo}" alt=""></div>` : thumb(exs[0])}
+        return `<div class="exrow"><span class="zoomable" data-act="pic-zoom" data-title="${esc(m.name)}">${m.photo ? `<div class="thumb md"><img src="${m.photo}" alt=""></div>` : thumb(exs[0])}</span>
           <div class="exbody"><b class="exname">${esc(m.name)}</b><small>${esc([m.brand, m.model].filter(Boolean).join(' · '))}</small>
           <div class="chips">${exs.map(e => `<a class="chip on" href="#/ex/${encodeURIComponent(e.id)}">${esc(e.name)}</a>`).join('')}</div></div>
           <button class="iconbtn" data-act="machine-menu" data-id="${m.id}">${icon.dots}</button></div>`;
@@ -180,6 +180,16 @@ export function gymView() {
 }
 
 register({
+  // Tap a picture in Gym Setup to see it big. preventDefault (in app.js) stops the tap from flipping the row's switch.
+  'pic-zoom': (el) => {
+    const img = el.querySelector('img');
+    if (!img) return;
+    const title = el.dataset.title || el.closest('.eqrow')?.querySelector('.eqname > span:last-child')?.firstChild?.textContent || '';
+    sheet(`<h2>${esc(title.trim())}</h2>
+      <div class="zoom-pic"><img src="${img.src}" alt="${esc(img.alt)}" referrerpolicy="no-referrer"></div>
+      ${img.alt ? `<p class="muted small">${esc(img.alt)}</p>` : ''}
+      <button class="btn" data-act="sheet-close">Close</button>`);
+  },
   'eq-toggle': (el) => { state.gym.enabled[el.dataset.id] = el.checked; touchGym(); scheduleSync(); },
   'rebuild-plan': () => {
     if (!confirm('Rebuild your plan with the current equipment? Your logged history is kept, but plan progress restarts at week 1.')) return;
