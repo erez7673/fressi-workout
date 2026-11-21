@@ -14,7 +14,7 @@ import { scheduleSync } from './sync.js';
 const eqThumb = (id) => {
   const pic = EQUIP_PIC[id];
   return pic
-    ? `<span class="thumb pic sm zoomable" data-act="pic-zoom"><img src="${pic.url}" alt="${esc(pic.brand + ' ' + pic.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></span>`
+    ? `<span class="thumb pic sm zoomable" data-act="pic-zoom"><img src="${pic.url}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></span>`
     : `<span class="thumb sm"><span class="ico">${icon.gym}</span></span>`;
 };
 const eqName = (id) => EQUIPMENT.find(e => e.id === id)?.name || state.gym.machines.find(m => m.id === id)?.name || id;
@@ -186,8 +186,7 @@ register({
     if (!img) return;
     const title = el.dataset.title || el.closest('.eqrow')?.querySelector('.eqname > span:last-child')?.firstChild?.textContent || '';
     sheet(`<h2>${esc(title.trim())}</h2>
-      <div class="zoom-pic"><img src="${img.src}" alt="${esc(img.alt)}" referrerpolicy="no-referrer"></div>
-      ${img.alt ? `<p class="muted small">${esc(img.alt)}</p>` : ''}
+      <div class="zoom-pic"><img src="${img.src}" alt="" referrerpolicy="no-referrer"></div>
       <button class="btn" data-act="sheet-close">Close</button>`);
   },
   'eq-toggle': (el) => { state.gym.enabled[el.dataset.id] = el.checked; touchGym(); scheduleSync(); },
