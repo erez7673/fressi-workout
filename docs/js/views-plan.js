@@ -1,13 +1,16 @@
 // My Plan, day preview, active workout and summary screens.
 import { state, profile, exById, photoFor, isAvailable, touchProfile, save, lastLogFor } from './store.js';
 import { esc, icon, thumb, register, sheet, closeSheet, toast, fmtClock, fmtKg, fmtDate, fmtDur, setLabel, themeButton } from './ui.js';
-import { currentWeek, planProgress, dayFocus, phaseOf, buildSession, estimateMinutes, estimateCalories, swapOptions, generatePlan, sortDay, itemArea, editKey, AREAS, setDayAreas, exPerDay, dayCap, warmOptions, warmPref, TEMPLATES, TPL_PHASES, generateTemplatePlan, templateExNames } from './planner.js';
+import { currentWeek, planProgress, dayFocus, phaseOf, buildSession, estimateMinutes, estimateCalories, swapOptions, generatePlan, sortDay, itemArea, editKey, AREAS, setDayAreas, exPerDay, dayCap, warmOptions, warmPref, sessionBudget, TEMPLATES, TPL_PHASES, generateTemplatePlan, templateExNames } from './planner.js';
 import { MUSCLES, PATTERN_NAMES } from './exercises.js';
 import * as W from './workout.js';
 import { rerender } from './app.js';
 import { scheduleSync } from './sync.js';
 
 let viewWeek = null;
+
+// Close button for the top-right corner of a bottom sheet.
+const closeX = `<button class="iconbtn sheet-x" data-act="sheet-close" aria-label="Close">${icon.x}</button>`;
 
 const avatar = (p) => `<div class="hdr-btns">${themeButton()}<button class="avatar" style="--c:${p.color}" data-act="switch-profile" aria-label="Switch profile">${esc(p.name[0] || '?')}</button></div>`;
 
@@ -155,12 +158,15 @@ export function dayView(w, d) {
       ${preview.warm ? `<div class="exrow"><a href="#/ex/${encodeURIComponent(preview.warm.exId)}">${thumb(exById(preview.warm.exId))}</a>
           <div class="exbody"><b class="exname">${esc(preview.warm.name)}</b>
           <button class="chips editable" data-act="warm-open" aria-label="Change warm-up"><span class="chip">${preview.warm.min} min</span><span class="chip edit">${icon.edit} Change</span></button></div></div>
-        <p class="muted small">Then a quick mobility routine:</p>
-        <ul class="moves">${preview.warmup.map(m => `<li>${esc(m.name)}<span>${fmtDur(m.sec)}</span></li>`).join('')}</ul>`
+        ${preview.warmup.length ? `<button class="row mobility-btn" data-act="mobility-open" data-w="${w}" data-d="${d}">${icon.info}<span><b>Then a quick mobility routine</b><small>${preview.warmup.length} moves · ${Math.round(preview.warmup.reduce((a, m) => a + m.sec, 0) / 60)} min</small></span><span class="chev">›</span></button>` : ''}`
       : `<button class="btn" data-act="warm-open">${icon.plus} Add a warm-up</button>`}
       <h3>Exercise List</h3>
       <div class="exlist">${items}</div>
-      ${preview.cardio ? `<h3>Cardio finisher</h3><a class="exrow" href="#/ex/${preview.cardio.exId}">${thumb(exById(preview.cardio.exId))}<div class="exbody"><b class="exname">${esc(preview.cardio.name)}</b><div class="chips"><span class="chip">${preview.cardio.min} min</span></div></div></a>` : ''}
+      <h3>Cardio finisher</h3>
+      ${preview.cardio ? `<div class="exrow"><a href="#/ex/${encodeURIComponent(preview.cardio.exId)}">${thumb(exById(preview.cardio.exId))}</a>
+          <div class="exbody"><b class="exname">${esc(preview.cardio.name)}</b>
+          <button class="chips editable" data-act="cardio-open" data-d="${d}" aria-label="Change cardio finisher"><span class="chip">${preview.cardio.min} min</span><span class="chip edit">${icon.edit} Change</span></button></div></div>`
+      : `<button class="btn" data-act="cardio-open" data-d="${d}">${icon.plus} Add a cardio finisher</button>`}
       <h3>Cooldown stretches</h3>
       <ul class="moves">${preview.cooldown.map(m => `<li>${esc(m.name)}<span>${fmtDur(m.sec)}</span></li>`).join('')}</ul>
       <div class="cta"><button class="btn primary big" data-act="start-day" data-w="${w}" data-d="${d}">${state.session?.startedAt ? 'Start (replaces current workout)' : done ? 'Do it again' : 'Start'}</button></div>`,
@@ -192,7 +198,7 @@ function openAreas(d) {
   const day = profile().plan.days[d];
   areaSel ||= [...(day.muscles || [])];
   sheet(`<h2>${esc(day.name)}: muscle areas</h2>
-    <p class="muted small">Pick one or more. The app chooses ${dayCap(profile())} exercise(s) for them (set the number under Profile → Edit) from the equipment in your gym. You can still swap or remove single exercises afterwards.</p>
+    <p class="muted small">Pick one or more. The app chooses ${dayCap(profile())} exercise(s) for them (set the number under Profile → Build your custom plan) from the equipment in your gym. You can still swap or remove single exercises afterwards.</p>
     <div class="choices grid">${Object.entries(AREAS).map(([k, a]) => `<button class="choice ${areaSel.includes(k) ? 'on' : ''}" data-act="areas-toggle" data-d="${d}" data-k="${k}">${esc(a.name)}</button>`).join('')}</div>
     <button class="btn primary" data-act="areas-save" data-d="${d}" ${areaSel.length ? '' : 'disabled'}>Pick exercises for these areas</button>
     ${day.muscles?.length ? `<button class="btn ghost" data-act="areas-clear" data-d="${d}">Let the app choose the areas</button>` : ''}`);
@@ -212,6 +218,53 @@ function openWarm() {
     <h3>Machine</h3>
     ${opts.length ? opts.map(e => `<button class="row ${e.id === wp.exId ? 'sel' : ''}" data-act="warm-pick" data-ex="${e.id}">${thumb(e, photoFor(e.id), 'sm')}<span><b>${esc(e.name)}</b></span>${e.id === wp.exId ? '<span class="pill">Selected</span>' : ''}</button>`).join('')
       : '<p class="muted">No cardio machines are on in Gym Setup.</p>'}
+    <button class="btn primary" data-act="sheet-close">Done</button>`);
+}
+
+// Bottom sheet to pick the cardio finisher machine and minutes for one workout day (all weeks).
+function openCardio(d) {
+  const p = profile();
+  const c = p.plan.days[d]?.cardio;
+  const opts = warmOptions();
+  const min = c?.min ?? 0;
+  sheet(`${closeX}<h2>Cardio finisher</h2>
+    <p class="muted small">Used on ${esc(p.plan.days[d].name)} in every week. Set the minutes to 0 to leave it out.</p>
+    <label class="field"><span>Minutes</span>
+      <div class="stepper"><button class="pillbtn dark" data-act="cardio-min" data-d="${d}" data-v="-1" aria-label="One minute less">−</button>
+      <input type="number" inputmode="numeric" min="0" max="60" value="${min}" data-change="cardio-min-set" data-d="${d}">
+      <button class="pillbtn dark" data-act="cardio-min" data-d="${d}" data-v="1" aria-label="One minute more">+</button></div></label>
+    <h3>Machine</h3>
+    ${opts.length ? opts.map(e => `<button class="row ${e.id === c?.exId ? 'sel' : ''}" data-act="cardio-pick" data-d="${d}" data-ex="${e.id}">${thumb(e, photoFor(e.id), 'sm')}<span><b>${esc(e.name)}</b></span>${e.id === c?.exId ? '<span class="pill">Selected</span>' : ''}</button>`).join('')
+      : '<p class="muted">No cardio machines are on in Gym Setup.</p>'}
+    <button class="btn primary" data-act="sheet-close">Done</button>`);
+}
+
+function saveCardio(d, patch) {
+  const p = profile();
+  const day = p.plan.days[d];
+  const opts = warmOptions();
+  const cur = day.cardio || {};
+  // A new finisher starts on the usual length for the profile's goal, on the first machine that's on.
+  const next = { exId: cur.exId || opts[0]?.id, min: cur.exId ? cur.min : (sessionBudget(p.stats).cardio || 10), ...patch };
+  if (!next.exId) return;
+  next.min = Math.max(0, Math.min(60, Math.round(next.min || 0)));
+  day.cardio = next;
+  // Also update a workout of this day that's open but whose finisher hasn't started yet.
+  const s = state.session;
+  if (s?.startedAt && s.profileId === p.id && s.planId === p.plan.id && s.dayIdx === d && !(s.cardio?.endAt || s.cardio?.done)) {
+    const ex = exById(next.exId);
+    s.cardio = next.min > 0 && ex ? { exId: ex.id, name: ex.name, min: next.min, done: false } : null;
+    save();
+  }
+  touchProfile(p); scheduleSync(); rerender(); openCardio(d);
+}
+
+// Pop-up with the mobility moves that follow the warm-up machine.
+function openMobility(w, d) {
+  const moves = buildSession(profile(), w, d).warmup;
+  sheet(`${closeX}<h2>Quick mobility routine</h2>
+    <p class="muted small">Do these right after the warm-up machine.</p>
+    <ul class="moves">${moves.map(m => `<li>${esc(m.name)}<span>${fmtDur(m.sec)}</span></li>`).join('')}</ul>
     <button class="btn primary" data-act="sheet-close">Done</button>`);
 }
 
@@ -251,6 +304,11 @@ register({
   'warm-pick': (el) => saveWarm({ exId: el.dataset.ex }),
   'warm-min': (el) => saveWarm({ min: warmPref(profile()).min + +el.dataset.v }),
   'warm-min-set': (el) => saveWarm({ min: +el.value || 0 }),
+  'cardio-open': (el) => openCardio(+el.dataset.d),
+  'cardio-pick': (el) => saveCardio(+el.dataset.d, { exId: el.dataset.ex }),
+  'cardio-min': (el) => { const d = +el.dataset.d; saveCardio(d, { min: (profile().plan.days[d].cardio?.min || 0) + +el.dataset.v }); },
+  'cardio-min-set': (el) => saveCardio(+el.dataset.d, { min: +el.value || 0 }),
+  'mobility-open': (el) => openMobility(+el.dataset.w, +el.dataset.d),
   'start-day': (el) => {
     if (state.session?.startedAt && !confirm('A workout is already in progress. Discard it and start this one?')) return;
     const p = profile();
@@ -265,7 +323,7 @@ register({
     const ex = exById(it.exId);
     const opts = swapOptions(p.stats, p.plan, d, i);
     const area = AREAS[itemArea(p.plan.days[d], it)]?.name || '';
-    sheet(`<h2>${esc(ex.name)}</h2>
+    sheet(`${closeX}<h2>${esc(ex.name)}</h2>
       <button class="row" data-act="go" data-href="#/ex/${encodeURIComponent(ex.id)}">${icon.info}<b>How to do it</b></button>
       <h3>Swap for another ${esc(area)} exercise <small class="muted">(${opts.length})</small></h3>
       ${opts.length ? opts.map(o => `<button class="row" data-act="swap" data-d="${d}" data-i="${i}" data-ex="${o.id}">${thumb(o, photoFor(o.id), 'sm')}<span><b>${esc(o.name)}</b><small>${esc(MUSCLES[o.m])}</small></span></button>`).join('') : '<p class="muted">No alternatives with your current gym setup.</p>'}
@@ -401,7 +459,7 @@ export function sessionView() {
       <a href="#/ex/${encodeURIComponent(c.exId)}">${thumb(exById(c.exId), photoFor(c.exId), 'sm')}</a>
       <div><b>${esc(c.name)}</b><small>${label} · ${c.min} min${c.done ? ' · done ✓' : ''}</small></div>
       ${running ? `<b class="bigtime sm" data-t="${k}">${fmtClock(Math.ceil((c.endAt - Date.now()) / 1000))}</b><button class="pillbtn" data-act="timer-stop" data-k="${k}">Stop</button>`
-        : `${k === 'warm' ? `<button class="iconbtn" data-act="warm-open" aria-label="Change warm-up">${icon.edit}</button>` : ''}<button class="pillbtn dark" data-act="timer-start" data-k="${k}">${c.done ? 'Again' : 'Start'}</button>`}
+        : `${k === 'warm' ? `<button class="iconbtn" data-act="warm-open" aria-label="Change warm-up">${icon.edit}</button>` : !c.done && s.planId === profile().plan.id ? `<button class="iconbtn" data-act="cardio-open" data-d="${s.dayIdx}" aria-label="Change cardio finisher">${icon.edit}</button>` : ''}<button class="pillbtn dark" data-act="timer-start" data-k="${k}">${c.done ? 'Again' : 'Start'}</button>`}
     </div>`;
   };
   const warm = `${timerCard('warm', 'Warm-up')}

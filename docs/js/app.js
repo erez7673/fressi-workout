@@ -6,7 +6,7 @@ import * as W from './workout.js';
 import { syncNow, syncEnabled, scheduleSync } from './sync.js';
 import { planView, dayView, sessionView, summaryView } from './views-plan.js';
 import { libraryView, exerciseView, gymView, identifyView } from './views-gym.js';
-import { onboardView, profileView, progressView } from './views-me.js';
+import { onboardView, customPlanView, profileView, progressView } from './views-me.js';
 import { timerView, timerTick } from './views-timer.js';
 
 const ROUTES = [
@@ -23,6 +23,7 @@ const ROUTES = [
   [/^#\/progress$/, () => progressView()],
   [/^#\/profile$/, () => profileView()],
   [/^#\/onboard(\/edit)?$/, (m) => onboardView(!!m[1])],
+  [/^#\/custom$/, () => customPlanView()],
 ];
 
 const TABS = [
@@ -49,7 +50,7 @@ export function render() {
   const full = view.full; // full-screen views hide the nav
   $('#nav').hidden = !!full || !profile();
   const seg = (hash.split('/')[1] || 'plan');
-  const tab = { day: 'plan', summary: 'plan', session: 'plan', ex: 'exercises', identify: 'gym', onboard: 'profile' }[seg] || seg;
+  const tab = { day: 'plan', summary: 'plan', session: 'plan', ex: 'exercises', identify: 'gym', onboard: 'profile', custom: 'profile' }[seg] || seg;
   $('#nav').innerHTML = TABS.map(([href, label, ic]) =>
     `<a href="${href}" class="${href === '#/' + tab ? 'on' : ''}">${ic}<span>${label}</span></a>`).join('');
   renderLiveBar(hash);
@@ -136,7 +137,7 @@ function upgradePlans() {
     let c = upgradePlan(p);
     // No day may have more exercises than set in the profile.
     for (const day of p.plan?.days || []) if (day.items.length > dayCap(p)) { day.items = day.items.slice(0, dayCap(p)); c = true; }
-    // Workout days follow the muscle areas chosen under Profile → Edit, bigger muscles first.
+    // Workout days follow the muscle areas chosen under Profile → Build your custom plan, bigger muscles first.
     if (applyProfileAreas(p)) c = true;
     if (c) { touchProfile(p); changed = true; }
   }

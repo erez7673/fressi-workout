@@ -4,7 +4,8 @@ import { allExercises, isAvailable, exById, lastLogFor, uid } from './store.js';
 
 export const PLAN_WEEKS = 12;
 export const EX_PER_DAY = 4;   // default exercises per workout day (not counting warm-up and cardio finisher)
-export const exPerDay = (st) => Math.max(1, Math.min(EX_PER_DAY, st?.exPerDay || EX_PER_DAY)); // the profile's choice, 1–4
+export const MAX_EX_PER_DAY = 8;
+export const exPerDay = (st) => Math.max(1, Math.min(MAX_EX_PER_DAY, st?.exPerDay || EX_PER_DAY)); // the profile's choice, 1–8
 // Exercises per day for this profile's plan: ready-made plans have their own number (see TEMPLATES).
 export const dayCap = (p) => TEMPLATES[p.plan?.template]?.perDay || exPerDay(p.stats);
 export const SETS = 4;         // sets per exercise
@@ -184,7 +185,10 @@ const SPLITS = {
   3: { name: 'Full Body', days: ['fullA', 'fullB', 'fullC'] },
   4: { name: 'Upper / Lower', days: ['upperA', 'lowerA', 'upperB', 'lowerB'] },
   5: { name: 'Push / Pull / Legs + Upper / Lower', days: ['push', 'pull', 'legs', 'upper', 'lower'] },
+  6: { name: 'Push / Pull / Legs ×2', days: ['push', 'pull', 'legs', 'push', 'pull', 'legs'] },
+  7: { name: 'Push / Pull / Legs ×2 + Full Body', days: ['push', 'pull', 'legs', 'push', 'pull', 'legs', 'fullA'] },
 };
+export const MAX_DAYS = 7;
 
 const PUSH_PATS = new Set(['h-push', 'v-push', 'chest-iso', 'side-delt', 'triceps', 'core']);
 const PULL_PATS = new Set(['v-pull', 'h-pull', 'rear-delt', 'biceps', 'traps', 'core']);
@@ -309,15 +313,22 @@ function autoItems(st, key, focusPats, rand, used, keep = [], n = exPerDay(st)) 
 // Exercises for the chosen muscle areas, taking one from each area in turn.
 // e.g. chest + biceps → chest press, curl, chest fly, curl.
 function itemsForAreas(st, areas, rand, used, keep = [], n = exPerDay(st)) {
-  const queues = areas.map(a => [...(AREAS[a]?.pats || [])]);
+  const fill = () => areas.map(a => [...(AREAS[a]?.pats || [])]);
+  let queues = fill();
   const items = [...keep];
-  while (items.length < n && queues.some(q => q.length)) {
-    for (const q of queues) {
-      if (items.length >= n) break;
-      const pat = q.shift();
-      if (!pat) continue;
-      const ex = pick(st, pat, { exclude: items.map(i => i.exId), used, rand, compoundFirst: items.length < 2 });
-      if (ex) items.push({ exId: ex.id, pat });
+  let added = true;
+  while (items.length < n && added) {
+    added = false;
+    // With many exercises a day the area lists run out: start them over, picking other exercises for the same areas.
+    if (!queues.some(q => q.length)) queues = fill();
+    while (items.length < n && queues.some(q => q.length)) {
+      for (const q of queues) {
+        if (items.length >= n) break;
+        const pat = q.shift();
+        if (!pat) continue;
+        const ex = pick(st, pat, { exclude: items.map(i => i.exId), used, rand, compoundFirst: items.length < 2 });
+        if (ex) { items.push({ exId: ex.id, pat }); added = true; }
+      }
     }
   }
   return items;
@@ -508,7 +519,7 @@ export function buildSession(p, week, dayIdx) {
   const muscles = new Set(items.map(i => exById(i.exId)?.m).filter(Boolean));
   const cool = [...muscles].map(m => COOLDOWN[m]).filter(Boolean).slice(0, 5);
   cool.push(COOLDOWN.general);
-  const cardio = day.cardio && exById(day.cardio.exId) ? { exId: day.cardio.exId, name: exById(day.cardio.exId).name, min: day.cardio.min, done: false } : null;
+  const cardio = day.cardio?.min > 0 && exById(day.cardio.exId) ? { exId: day.cardio.exId, name: exById(day.cardio.exId).name, min: day.cardio.min, done: false } : null;
 
   return {
     id: uid('s'), profileId: p.id, planId: p.plan.id, week, dayIdx, title: day.name,

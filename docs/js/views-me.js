@@ -1,7 +1,7 @@
 // Onboarding / edit profile, Profile & settings, Progress screens.
 import { state, profile, profileList, createProfile, touchProfile, save, replaceState, exById, today } from './store.js';
 import { esc, icon, register, toast, fmtDate, fmtKg, sheet, closeSheet, setTheme } from './ui.js';
-import { GOALS, LEVELS, FOCUS, generatePlan, AREAS, areasFor, dayName, exPerDay, setDayAreas, fitDay } from './planner.js';
+import { GOALS, LEVELS, FOCUS, generatePlan, AREAS, areasFor, dayName, exPerDay, setDayAreas, fitDay, MAX_DAYS, MAX_EX_PER_DAY } from './planner.js';
 import { INJURIES, MUSCLES } from './exercises.js';
 import { lineChart, barChart } from './charts.js';
 import { syncNow, syncEnabled, scheduleSync } from './sync.js';
@@ -9,18 +9,18 @@ import { rerender } from './app.js';
 
 const COLORS = ['#2f7cf6', '#e84d8a', '#12a37f', '#f08a24', '#8b5cf6'];
 
-// ───────────── Onboarding / edit ─────────────
-export function onboardView(edit) {
-  const p = edit ? profile() : null;
-  const s = p?.stats || { sex: 'female', level: 'beginner', goal: 'hypertrophy', days: 3, minutes: 45, warmup: 5, cardio: true, injuries: [], focus: [] };
+// ───────────── Onboarding / edit profile / custom plan ─────────────
+// mode: 'new' (whole form), 'edit' (personal details up to training days) or 'custom' (the plan settings).
+const DEFAULT_STATS = { sex: 'female', level: 'beginner', goal: 'hypertrophy', days: 3, minutes: 45, warmup: 5, cardio: true, injuries: [], focus: [] };
+const range = (a, b) => Object.fromEntries(Array.from({ length: b - a + 1 }, (_, i) => [a + i, String(a + i)]));
+
+function profileForm(mode) {
+  const p = mode === 'new' ? null : profile();
+  const s = p?.stats || DEFAULT_STATS;
   const radio = (name, map, val, attrs = '') => `<div class="seg-ctl">${Object.entries(map).map(([k, v]) => `<label><input type="radio" name="${name}" value="${k}" ${String(val) === String(k) ? 'checked' : ''} ${attrs}><span>${esc(v)}</span></label>`).join('')}</div>`;
   const checks = (name, map, vals) => `<div class="chipwrap">${Object.entries(map).map(([k, v]) => `<label class="chk"><input type="checkbox" name="${name}" value="${k}" ${vals.includes(k) ? 'checked' : ''}><span>${esc(typeof v === 'string' ? v : v.name)}</span></label>`).join('')}</div>`;
-  const first = !profileList().length;
-  return {
-    full: first,
-    html: `<header class="bar">${first ? '<span></span>' : `<button class="iconbtn" data-act="back">${icon.back}</button>`}<h2>${edit ? 'Edit profile' : first ? 'Welcome 👋' : 'New profile'}</h2><span></span></header>
-      ${first ? '<p class="lead">Let\'s build your personal plan for Fressi Jätkäsaari. You can add your partner\'s profile afterwards.</p>' : ''}
-      <form id="pform" class="form" data-act-submit>
+  const days = s.days || 3;
+  const personal = `
         <label class="field"><span>Name</span><input name="name" required value="${esc(p?.name || '')}" placeholder="Your name"></label>
         <div class="field"><span>Sex</span>${radio('sex', { female: 'Female', male: 'Male' }, s.sex)}</div>
         <div class="three">
@@ -30,39 +30,62 @@ export function onboardView(edit) {
         </div>
         <div class="field"><span>Experience</span>${radio('level', LEVELS, s.level)}</div>
         <div class="field"><span>Main goal</span>${radio('goal', Object.fromEntries(Object.entries(GOALS).map(([k, v]) => [k, v.name])), s.goal)}</div>
-        <div class="field"><span>Training days per week</span>${radio('days', { 2: '2', 3: '3', 4: '4', 5: '5' }, s.days, 'data-change="pf-days"')}</div>
-        <div class="field"><span>Exercises per workout day <small>(4 sets each, plus warm-up and cooldown)</small></span>${radio('exPerDay', { 1: '1', 2: '2', 3: '3', 4: '4' }, exPerDay(s))}</div>
-        <div class="field"><span>Muscle areas per workout day <small>(leave a day empty and the app chooses)</small></span>
-          ${[0, 1, 2, 3, 4].map(i => `<div class="dayareas" data-day="${i}" ${i >= s.days ? 'hidden' : ''}><b>${dayName(i)}</b>${checks('areas' + i, AREAS, p ? areasFor(p, i) : [])}</div>`).join('')}
-        </div>
+        <div class="field"><span>Training days per week</span>${radio('days', range(2, MAX_DAYS), days)}</div>`;
+  const planFields = `
+        <div class="field"><span>Exercises per workout day <small>(4 sets each, plus warm-up and cooldown)</small></span>${radio('exPerDay', range(1, MAX_EX_PER_DAY), exPerDay(s))}</div>
+        ${mode === 'custom' ? `<div class="field"><span>Muscle areas per workout day <small>(leave a day empty and the app chooses)</small></span>
+          ${Array.from({ length: days }, (_, i) => `<div class="dayareas"><b>${dayName(i)}</b>${checks('areas' + i, AREAS, areasFor(p, i))}</div>`).join('')}
+        </div>` : ''}
         <div class="field"><span>Session length</span>${radio('minutes', { 30: '30 min', 45: '45 min', 60: '60 min', 75: '75 min' }, s.minutes)}</div>
         <div class="field"><span>Warm-up</span>${radio('warmup', { 0: 'None', 3: '3 min', 5: '5 min', 8: '8 min' }, s.warmup)}</div>
         <label class="toggle-line"><input type="checkbox" name="cardio" ${s.cardio ? 'checked' : ''}> Add a cardio finisher (treadmill, elliptical, stairs, bike)</label>
         <div class="field"><span>Injuries or limitations <small>(exercises that load these are avoided)</small></span>${checks('injuries', INJURIES, s.injuries || [])}</div>
-        <div class="field"><span>Extra focus <small>(adds exercises for these)</small></span>${checks('focus', FOCUS, s.focus || [])}</div>
-        ${!edit ? `<div class="field"><span>Colour</span><div class="colors">${COLORS.map((c, i) => `<label><input type="radio" name="color" value="${c}" ${i === profileList().length % COLORS.length ? 'checked' : ''}><i style="background:${c}"></i></label>`).join('')}</div></div>` : ''}
-        ${edit ? `<button class="btn primary big" data-act="save-profile" data-rebuild="1">Save & rebuild plan</button>
-                  <button class="btn" data-act="save-profile">Save without changing the plan</button>`
-               : `<button class="btn primary big" data-act="create-profile">Build my plan</button>`}
-      </form>`,
+        <div class="field"><span>Extra focus <small>(adds exercises for these)</small></span>${checks('focus', FOCUS, s.focus || [])}</div>`;
+  const colour = `<div class="field"><span>Colour</span><div class="colors">${COLORS.map((c, i) => `<label><input type="radio" name="color" value="${c}" ${i === profileList().length % COLORS.length ? 'checked' : ''}><i style="background:${c}"></i></label>`).join('')}</div></div>`;
+  const buttons = mode === 'new' ? `<button class="btn primary big" data-act="create-profile">Build my plan</button>`
+    : mode === 'custom' ? `<button class="btn primary big" data-act="save-profile" data-mode="custom" data-rebuild="1">Build my custom plan</button>
+                  <button class="btn" data-act="save-profile" data-mode="custom">Save without changing the plan</button>`
+    : `<button class="btn primary big" data-act="save-profile" data-mode="edit" data-rebuild="1">Save & rebuild plan</button>
+                  <button class="btn" data-act="save-profile" data-mode="edit">Save without changing the plan</button>`;
+  return `<form id="pform" class="form" data-act-submit>
+        ${mode !== 'custom' ? personal : ''}
+        ${mode !== 'edit' ? planFields : ''}
+        ${mode === 'new' ? colour : ''}
+        ${buttons}
+      </form>`;
+}
+
+export function onboardView(edit) {
+  const first = !profileList().length;
+  return {
+    full: first,
+    html: `<header class="bar">${first ? '<span></span>' : `<button class="iconbtn" data-act="back">${icon.back}</button>`}<h2>${edit ? 'Edit profile' : first ? 'Welcome 👋' : 'New profile'}</h2><span></span></header>
+      ${first ? '<p class="lead">Let\'s build your personal plan for Fressi Jätkäsaari. You can add your partner\'s profile afterwards.</p>' : ''}
+      ${profileForm(edit ? 'edit' : 'new')}
+      ${edit ? '<p class="muted small">Exercises per day, muscle areas, session length, warm-up, cardio, injuries and extra focus are under Profile → Build your custom plan.</p>' : ''}`,
   };
 }
 
+export function customPlanView() {
+  const p = profile();
+  return {
+    html: `<header class="bar"><button class="iconbtn" data-act="back">${icon.back}</button><h2>Build your custom plan</h2><span></span></header>
+      <p class="muted small">Choose how each of your ${p.stats.days || 3} workout days looks. Change the number of days under Edit profile.</p>
+      ${profileForm('custom')}`,
+  };
+}
+
+// Reads only the fields that are on the form, so the edit and custom-plan screens each change their own part.
 function readForm() {
   const f = document.getElementById('pform');
   if (!f.reportValidity()) return null;
   const fd = new FormData(f);
-  return {
-    name: fd.get('name').trim(), color: fd.get('color'),
-    stats: {
-      sex: fd.get('sex'), age: +fd.get('age'), height: +fd.get('height'), weight: +fd.get('weight'),
-      level: fd.get('level'), goal: fd.get('goal'), days: +fd.get('days'), minutes: +fd.get('minutes'),
-      warmup: +fd.get('warmup'), cardio: fd.get('cardio') === 'on',
-      injuries: fd.getAll('injuries'), focus: fd.getAll('focus'),
-      exPerDay: +fd.get('exPerDay') || 4,
-      dayAreas: Array.from({ length: +fd.get('days') }, (_, i) => fd.getAll('areas' + i)),
-    },
-  };
+  const has = (n) => !!f.querySelector(`[name="${n}"]`);
+  const stats = {};
+  if (has('age')) Object.assign(stats, { sex: fd.get('sex'), age: +fd.get('age'), height: +fd.get('height'), weight: +fd.get('weight'), level: fd.get('level'), goal: fd.get('goal'), days: +fd.get('days') });
+  if (has('minutes')) Object.assign(stats, { minutes: +fd.get('minutes'), warmup: +fd.get('warmup'), cardio: fd.get('cardio') === 'on', injuries: fd.getAll('injuries'), focus: fd.getAll('focus'), exPerDay: +fd.get('exPerDay') || 4 });
+  if (has('areas0')) stats.dayAreas = Array.from({ length: profile().stats.days || 3 }, (_, i) => fd.getAll('areas' + i));
+  return { name: has('name') ? fd.get('name').trim() : null, color: fd.get('color'), stats };
 }
 
 // After saving without a rebuild: apply changed muscle areas, then give every day the chosen number of exercises.
@@ -76,8 +99,6 @@ function applyDayChanges(p) {
 }
 
 register({
-  // Show a muscle-area row for each training day.
-  'pf-days': (el) => document.querySelectorAll('.dayareas').forEach(r => { r.hidden = +r.dataset.day >= +el.value; }),
   'create-profile': () => {
     const d = readForm(); if (!d) return;
     d.stats.likes = []; d.stats.dislikes = [];
@@ -90,11 +111,11 @@ register({
   'save-profile': (el) => {
     const d = readForm(); if (!d) return;
     const p = profile();
-    p.name = d.name;
+    if (d.name) p.name = d.name;
     const oldW = p.stats.weight;
     if (el.dataset.rebuild && p.plan && Object.keys(p.plan.done).length && !confirm('Rebuilding restarts your plan at week 1 (history is kept). Continue?')) return;
     p.stats = { ...p.stats, ...d.stats };
-    if (d.stats.weight !== oldW) p.bodyweight.push({ date: today(), kg: d.stats.weight });
+    if (d.stats.weight && d.stats.weight !== oldW) p.bodyweight.push({ date: today(), kg: d.stats.weight });
     if (el.dataset.rebuild) p.plan = generatePlan(p);
     else applyDayChanges(p);
     touchProfile(p); scheduleSync();
@@ -114,7 +135,8 @@ export function profileView() {
         <div><b>${esc(p.name)}</b><small>${s.age} y · ${s.height} cm · ${fmtKg(s.weight)} kg · ${esc(LEVELS[s.level])}</small>
         <small>${esc(GOALS[s.goal].name)} · ${s.days} days × ${s.minutes} min</small></div></div>
       <div class="card list">
-        <a class="eqrow" href="#/onboard/edit"><span>Edit stats, goal & schedule</span>${icon.chev}</a>
+        <a class="eqrow" href="#/onboard/edit"><span>Edit profile</span>${icon.chev}</a>
+        <a class="eqrow" href="#/custom"><span>Build your custom plan</span>${icon.chev}</a>
         <button class="eqrow" data-act="tpl-open"><span>Ready-made plans (beginner, 50+)</span>${icon.chev}</button>
         <button class="eqrow" data-act="switch-profile"><span>Switch profile</span><span class="muted">${profileList().length} profiles ${icon.chev}</span></button>
         <a class="eqrow" href="#/onboard"><span>Add a profile (partner)</span>${icon.plus}</a>

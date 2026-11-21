@@ -326,6 +326,10 @@ body:has(.cta) #livebar { bottom: calc(var(--nav-h) + env(safe-area-inset-bottom
 .sheet-bg { position: absolute; inset: 0; background: rgba(0,0,0,.4); animation: fade .2s; }
 .sheet-card { position: absolute; left: 0; right: 0; bottom: 0; max-height: 85vh; overflow-y: auto; background: var(--card); border-radius: 24px 24px 0 0; padding: 8px 18px calc(env(safe-area-inset-bottom) + 20px); animation: up .22s ease-out; max-width: 600px; margin: 0 auto; }
 .sheet-card h2 { margin: 8px 0 8px; }
+.sheet-x { position: sticky; top: 0; float: right; z-index: 2; width: 38px; height: 38px; margin: 0 -6px 0 8px; }
+.mobility-btn { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; border-bottom: 0; margin-top: 10px; }
+.mobility-btn small { color: var(--ink3); }
+.mobility-btn .chev { margin-left: auto; color: var(--ink3); font-size: 22px; line-height: 1; }
 .grab { width: 40px; height: 5px; border-radius: 5px; background: var(--line); margin: 4px auto 10px; }
 @keyframes up { from { transform: translateY(100%); } }
 @keyframes fade { from { opacity: 0; } }

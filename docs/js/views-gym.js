@@ -124,7 +124,7 @@ register({
     } else if (day.items.length >= dayCap(p)) {
       // The day already has the number of exercises set in the profile: choose one to replace.
       sheet(`<h2>${esc(day.name)} is full</h2>
-        <p class="muted small">It has ${day.items.length} of ${dayCap(p)} exercises (set under Profile → Edit). Replace one with ${esc(ex.name)}:</p>
+        <p class="muted small">It has ${day.items.length} of ${dayCap(p)} exercises (set under Profile → Build your custom plan). Replace one with ${esc(ex.name)}:</p>
         ${day.items.map((it, i) => { const o = exById(it.exId); return o ? `<button class="row" data-act="add-to-day-replace" data-id="${ex.id}" data-d="${el.dataset.d}" data-i="${i}">${thumb(o, photoFor(o.id), 'sm')}<span><b>${esc(o.name)}</b><small>${esc(MUSCLES[o.m])}</small></span>${icon.swap}</button>` : ''; }).join('')}
         <button class="btn ghost" data-act="sheet-close">Cancel</button>`);
       return;
