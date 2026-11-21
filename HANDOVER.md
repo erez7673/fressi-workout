@@ -44,7 +44,9 @@ These changes don't affect the clips. If a future change adds a JS or CSS file, 
 - `leg-press-calf`: the female clip bent the knees like a leg press in both tries. The male single-still clip worked (job `143c5fbc-166d-4f14-a398-fa8892268b19`). It was not committed and the scratchpad copy may be gone, so download it again from Higgsfield (`jobs_wait` with that job id gives the URL), then convert it with `-r 24` and `enc.sh`, without bounce. Its start still is `b66c1b44-7a96-4741-947b-0e44fc1221dc`, the female start still is `e347c6bb-fa7b-4c11-9d51-302a29846862`.
 - Ideas: a side view where only the feet are framed large, or a calf raise drawn as an SVG in `DEFS` instead of a clip.
 
-**Batch 10 (next month, after the credit refill):** the 5 core exercises, plus another try at the two calf raises.
+**Batch 10 (next month, after the credit refill):** the 5 core exercises, plus another try at the two calf raises, plus `decline-situp` (Decline Sit-Up on a decline / sit-up bench, added 2026-11-21; a big pose change, so use the 21:9 two-keyframe method).
+
+**Also in December:** replace every maker picture in `docs/js/pictures.js` (about 43, plus the new `decline-bench`) with our own generic pictures without brand marks, since the app is now public as Rep12.
 - First check the balance with `balance`.
 - After batch 10, every non-cardio exercise has a clip.
 - Cardio clips are optional and only if the user asks.

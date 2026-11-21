@@ -337,6 +337,10 @@ export const EXERCISES = [
   E('dead-bug', 'Dead Bug', 'none', 'core', 'core', {
     pos: 'lying', grip: 'none', mot: 'core-flex', load: 0,
     steps: ['Lie on your back, arms up, knees bent at 90° over your hips.', 'Press your lower back into the floor.', 'Slowly extend one arm overhead and the opposite leg out.', 'Return and switch sides.'] }),
+  E('decline-situp', 'Decline Sit-Up', 'decline-bench', 'core', 'core', {
+    pos: 'lying', grip: 'pad-legs', mot: 'core-flex', lvl: 2, avoid: ['lowerback', 'neck'], load: 0,
+    steps: ['Sit on the decline bench and hook your feet under the foot rollers.', 'Lie back until your back is on the pad, hands crossed on your chest.', 'Breathe out and curl up all the way until your upper body is upright.', 'Lower slowly, one vertebra at a time, without dropping back.'],
+    tip: 'Too hard? Cross your arms higher or set a lower angle. Harder: hold a weight plate on your chest.' }),
   E('ab-machine', 'Ab Crunch Machine', 'ab-machine', 'core', 'core', {
     pos: 'seated', grip: 'handles', mot: 'core-flex', load: 0.3, inc: 5,
     steps: ['Adjust the seat, hold the handles or place arms on the pads.', 'Curl your torso forward and down.', 'Squeeze your abs.', 'Return slowly.'] }),

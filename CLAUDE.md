@@ -67,7 +67,7 @@ Deploy = commit and push to `main`; GitHub Pages is live about 30 s later. On ph
 - **Drawn SVG fallback:** `DEFS` holds side-view stick-figure animations (two-joint IK in `reach()`, loop timing in `phase()`); `startAnims` runs them after render.
 - To add a clip: put both files in `docs/media/anim/` and add the exercise id to `VIDEOS`.
 - **Status (2026-11-21):** 89 of 103 exercises have clips.
-  - **Paused:** the Higgsfield credits ran out. When they are refilled next month (December 2026), we complete the remaining animations: 5 core exercises plus the two calf raises (batch 10). Cardio has no clips by design.
+  - **Paused:** the Higgsfield credits ran out. When they are refilled next month (December 2026), we complete the remaining animations: 5 core exercises, the two calf raises and the Decline Sit-Up (batch 10). Cardio has no clips by design.
   - `HANDOVER.md` holds the exact list, every approved still ID and the helper scripts in `tools/clips/`. Read it before starting batch 10.
 
 **Equipment pictures (`pictures.js`).**

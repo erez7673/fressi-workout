@@ -20,6 +20,7 @@ export const EQUIPMENT = [
   Q('rack', 'Power rack / squat rack', 'Benches & racks', true),
   Q('smith', 'Smith machine', 'Benches & racks', true),
   Q('preacher', 'Preacher curl bench', 'Benches & racks', true),
+  Q('decline-bench', 'Decline / sit-up bench', 'Benches & racks', false, false),
 
   Q('cable-single', 'Cable column (adjustable pulley)', 'Cable machines', true),
   Q('cable-crossover', 'Cable crossover / dual pulley', 'Cable machines', true),
