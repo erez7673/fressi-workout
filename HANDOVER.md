@@ -2,15 +2,16 @@
 
 Read this together with `CLAUDE.md` (the "Exercise animations" section holds the full rules). This file records where the work stands and every approved Higgsfield still, so a new chat can continue without redoing anything.
 
-_Last updated 2026-11-21, after batch 9 and the app changes in `ddd4158`._
+_Last updated 2026-11-21 (evening), after batch 9, the app changes in `ddd4158` and the Rep12 public release (`c4e7183` to `818343c`)._
 
 ## Where things stand
 
 - **Paused until next month (December 2026).** The Higgsfield credits ran out after batch 9. When they are refilled next month, we finish the remaining animations (batch 10, below).
-- **Done and in the app:** 89 of the app's 103 exercises have male + female clips (`VIDEOS` in `docs/js/anim.js`): leg press plus batches 1–9.
-  - The other 14 are the 7 in the table below, plus 7 cardio machines that were never planned for clips.
+- **Done and in the app:** 89 of the app's 105 exercises have male + female clips (`VIDEOS` in `docs/js/anim.js`): leg press plus batches 1–9.
+  - The other 16 are the 9 in the table below, plus 7 cardio machines that were never planned for clips.
 - **Git:** everything is committed and pushed (batch 9 is commit `da1264a`).
-- **Credits: 0.66 left. Nothing can be generated until the monthly refill.** Images cost 0.25. A seedance video costs 2–2.5. Batch 9 used about 65 credits. Batch 10 should need about 30.
+- **Credits: 0.66 left (paid "plus" plan, refreshes in December). Nothing can be generated until then.** A `gpt_image_2_6` image was quoted at 0.75 credits on 2026-11-21 (earlier notes said 0.25, so check with `estimate_image_cost`). A seedance video costs 2–2.5. Batch 9 used about 65 credits.
+- **December budget:** batch 10 (9 exercises) about 35–45 credits, plus the equipment pictures about 35–50 credits (see below).
 - **Always check the balance BEFORE sending a batch,** never in the same step.
 - **Workflow with the user:** generate 10 exercises per batch, then send a review video and wait. When the user answers "Yes, push and continue", commit and push, then start the next batch. Never push without that answer.
 
@@ -32,21 +33,36 @@ The details are in `CLAUDE.md`.
 
 These changes don't affect the clips. If a future change adds a JS or CSS file, add it to `FILES` in `sw.js`.
 
-## Still to do next month (7 exercises, cardio excluded)
+## Public release as Rep12 (2026-11-21, pushed)
+
+- **New name and address:** the app is now **Rep12** at https://erez7673.github.io/rep12/. The GitHub repo was renamed from `fressi-workout` to `rep12`; the old address no longer works. Both users reinstalled from the new link. Their data carried over because the origin (`erez7673.github.io`) and the localStorage key `fressi.v1` stayed the same. **Never rename that key.**
+- **No gym or brand names in the UI:** "Fressi Jätkäsaari", "Matrix" and "Gym80" were removed from Gym Setup (the categories are now "Weight-stack machines" and "Plate-loaded machines", with no "confirm" tags), exercise names, the machine wizard (Brand is free text) and the AI prompt in `Code.gs`. Picture captions and `alt` texts no longer show maker product names.
+- **Added for the public:** a health disclaimer (welcome screen and Profile → About) and a privacy note (Profile → About). The README is rewritten for public users.
+- **New equipment and exercise:** `decline-bench` (Decline / sit-up bench, under Benches & racks, off by default, no picture yet) and `decline-situp` (Decline Sit-Up, core, avoided for lower back and neck injuries). It needs a clip and a picture.
+- **Day view:** each exercise has a move button (↕) that opens a "Change the order" sheet (Move up / Move down, "Back to the app's order"). A reordered day has `day.manual = true`, which `sortDay` respects.
+- **Add to workout on a full day** offers Add or Swap. Adding raises the exercises-per-day setting (`raiseDayCap`: `p.stats.exPerDay`, or `plan.cap` for ready-made plans), max 8.
+
+## Still to do next month (9 exercises, cardio excluded)
 
 | Group | Exercise ids |
 |---|---|
 | Calves (hard, see below) | `smith-calf`, `leg-press-calf` |
-| Core | `woodchop`, `db-woodchop`, `pallof`, `ab-machine`, `rotary-torso` |
+| Core | `woodchop`, `db-woodchop`, `pallof`, `ab-machine`, `rotary-torso`, `farmer-carry`, `decline-situp` |
+
+`farmer-carry` was missing from the earlier lists (found 2026-11-21): it has neither a clip nor an SVG animation. It is a walking move, so a standing hold with a few steps in place is enough. `decline-situp` is new.
 
 **Calf raises that failed in batch 8:** the video model turns a small ankle movement into a big one.
 - `smith-calf` (3 tries, male and female): a single-still loop becomes a squat (the knees bend), even with "NOT a squat, knees locked" in the prompt. Edited top and bottom stills redraw the machine from a different angle, so the camera drifts.
 - `leg-press-calf`: the female clip bent the knees like a leg press in both tries. The male single-still clip worked (job `143c5fbc-166d-4f14-a398-fa8892268b19`). It was not committed and the scratchpad copy may be gone, so download it again from Higgsfield (`jobs_wait` with that job id gives the URL), then convert it with `-r 24` and `enc.sh`, without bounce. Its start still is `b66c1b44-7a96-4741-947b-0e44fc1221dc`, the female start still is `e347c6bb-fa7b-4c11-9d51-302a29846862`.
 - Ideas: a side view where only the feet are framed large, or a calf raise drawn as an SVG in `DEFS` instead of a clip.
 
-**Batch 10 (next month, after the credit refill):** the 5 core exercises, plus another try at the two calf raises, plus `decline-situp` (Decline Sit-Up on a decline / sit-up bench, added 2026-11-21; a big pose change, so use the 21:9 two-keyframe method).
+**Batch 10 (next month, after the credit refill):** the 7 core exercises in the table, plus another try at the two calf raises. The Decline Sit-Up is a big pose change, so use the 21:9 two-keyframe method for it.
 
-**Also in December:** replace every maker picture in `docs/js/pictures.js` (about 43, plus the new `decline-bench`) with our own generic pictures without brand marks, since the app is now public as Rep12.
+**Equipment pictures (also December, the user's decision):** replace every maker picture in `docs/js/pictures.js` with our own generic pictures without logos or brand marks, since the app is now public as Rep12.
+- About 43 pictures: every `EQUIP_PIC` entry (some share one, e.g. abductor and adductor), plus `bb-bench` in `EX_PIC`, plus the new `decline-bench`.
+- Generate them with `gpt_image_2_6` on Higgsfield: a plain product shot, black frame and dark upholstery, no logos, no text, on a white or light grey studio background (like the current tiles). Use the first approved picture as the style reference for the rest, so they match.
+- Store them in the repo (e.g. `docs/media/equip/<id>.webp`, about 480 px), point `EQUIP_PIC` and `EX_PIC` at them, and remove the hotlinks to `gym80.de` and `assets.jhtbrand.co` (also their cache rule in `sw.js` and the `.thumb.pic.matrix` CSS). Decide whether they should work offline: anything under `/media/` bypasses the service worker today.
+- Show the user a contact sheet before committing.
 - First check the balance with `balance`.
 - After batch 10, every non-cardio exercise has a clip.
 - Cardio clips are optional and only if the user asks.
