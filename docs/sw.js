@@ -1,6 +1,6 @@
 // Offline support: network first (so updates show up straight away), cached copy when offline.
-const CACHE = 'fressi-v4';
-const PICS = 'fressi-pics-v1';
+const CACHE = 'rep12-v5';
+const PICS = 'rep12-pics-v1';
 const FILES = [
   './', './index.html', './manifest.webmanifest', './css/app.css',
   './js/app.js', './js/store.js', './js/ui.js', './js/exercises.js', './js/equipment.js', './js/pictures.js',
@@ -20,7 +20,7 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET') return;
-  // gym80 equipment pictures: cache first (they never change), so they show offline at the gym.
+  // Maker equipment pictures: cache first (they never change), so they show offline at the gym.
   if ((url.hostname === 'gym80.de' && url.pathname.startsWith('/wp-content/uploads/'))
     || (url.hostname === 'assets.jhtbrand.co' && url.pathname.startsWith('/files/product/'))) {
     e.respondWith(caches.open(PICS).then(c => c.match(e.request).then(hit => hit || fetch(e.request).then(res => {

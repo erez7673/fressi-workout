@@ -50,11 +50,11 @@ export const EXERCISES = [
     s: ['triceps', 'shoulders'], pos: 'seated', grip: 'handles', mot: 'push-forward', load: 0.45, inc: 5,
     steps: ['Adjust the seat so the handles are at mid-chest height.', 'Sit with your back flat against the pad, feet on the floor.', 'Push the handles forward until arms are almost straight.', 'Return slowly until you feel a stretch in the chest.'],
     tip: 'A great, safe first press for beginners.' }),
-  E('plate-chest-press', 'Plate-Loaded Chest Press (Gym80)', 'plate-chest-press', 'h-push', 'chest', {
+  E('plate-chest-press', 'Plate-Loaded Chest Press', 'plate-chest-press', 'h-push', 'chest', {
     s: ['triceps', 'shoulders'], pos: 'seated', grip: 'handles', mot: 'push-forward', load: 0.4, inc: 5,
     steps: ['Load equal plates on both sides. Set the seat so handles are at mid-chest.', 'Sit back, grab the handles, shoulder blades back.', 'Press forward until arms are almost straight.', 'Lower slowly. Each arm moves independently – keep them even.'],
     tip: 'Weight shown is total plates loaded.' }),
-  E('plate-incline-press', 'Plate-Loaded Incline Press (Gym80)', 'plate-incline-press', 'h-push', 'chest', {
+  E('plate-incline-press', 'Plate-Loaded Incline Press', 'plate-incline-press', 'h-push', 'chest', {
     s: ['shoulders', 'triceps'], pos: 'seated', grip: 'handles', mot: 'push-forward', load: 0.35, inc: 5,
     steps: ['Load equal plates. Set the seat so handles start at upper-chest level.', 'Sit back with chest up and shoulder blades squeezed.', 'Press up and forward until arms are nearly straight.', 'Lower slowly to a comfortable stretch.'] }),
   E('pushup', 'Push-Up', 'none', 'h-push', 'chest', {
@@ -140,7 +140,7 @@ export const EXERCISES = [
   E('machine-row', 'Chest-Supported Machine Row', 'row-machine', 'h-pull', 'back', {
     s: ['biceps', 'rear-delts'], pos: 'seated', grip: 'handles', mot: 'pull-toward', load: 0.45, inc: 5,
     steps: ['Adjust the seat so handles are at chest height and your chest rests on the pad.', 'Grip the handles with arms straight.', 'Pull back, squeezing your shoulder blades.', 'Return slowly.'] }),
-  E('plate-row', 'Machine Seated One-Arm Row (Gym80)', 'plate-row', 'h-pull', 'back', {
+  E('plate-row', 'Machine Seated One-Arm Row', 'plate-row', 'h-pull', 'back', {
     s: ['biceps', 'rear-delts'], pos: 'seated', grip: 'handles', mot: 'pull-toward', load: 0.25, inc: 5,
     steps: ['Load plates. Set the seat so your chest is on the pad and the handles are reachable.', 'Grip one or both handles with arms straight.', 'Pull your elbow(s) back past your body.', 'Return slowly. If doing one arm at a time, do all reps then switch.'] }),
   E('db-row', 'One-Arm Dumbbell Row', 'dumbbells+bench-flat|dumbbells+bench-adj', 'h-pull', 'back', {
@@ -172,7 +172,7 @@ export const EXERCISES = [
   E('ez-curl', 'EZ-Bar Curl', 'ezbar', 'biceps', 'biceps', {
     s: ['forearms'], pos: 'standing', grip: 'bar', mot: 'curl', iso: true, avoid: ['wrist'], load: 0.2, inc: 2.5,
     steps: ['Hold the EZ bar on the angled grips, palms up.', 'Elbows at your sides.', 'Curl the bar up to your chest.', 'Lower slowly without swinging.'] }),
-  E('preacher-curl', 'Preacher Curl (Gym80 bench)', 'preacher+ezbar|preacher+dumbbells', 'biceps', 'biceps', {
+  E('preacher-curl', 'Preacher Curl', 'preacher+ezbar|preacher+dumbbells', 'biceps', 'biceps', {
     pos: 'seated', grip: 'bar', mot: 'curl', iso: true, avoid: ['elbow'], load: 0.15, inc: 2.5,
     steps: ['Adjust the seat so your armpits sit at the top of the pad.', 'Hold an EZ bar (or dumbbell) with arms on the pad.', 'Curl up until forearms are vertical.', 'Lower slowly, stopping just short of locking the elbows.'] }),
   E('cable-curl', 'Cable Curl', 'cable-single|cable-crossover', 'biceps', 'biceps', {

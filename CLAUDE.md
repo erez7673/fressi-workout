@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Fressi Workout: a personal workout PWA for two users (a couple) at Fressi Jätkäsaari gym, Helsinki (gym80 and Matrix machines). Plain HTML/CSS/ES-module JavaScript with **no build step, no package manager and no tests**. `SPEC.md` holds the original requirements; `README.md` holds the user-facing setup guide (GitHub Pages, phone install, Google Sheets sync).
+Rep12 (formerly Fressi Workout): a workout PWA, published for the public. It started as an app for a couple at Fressi Jätkäsaari gym, Helsinki; keep the UI free of gym and machine-brand names (gym80, Matrix). The equipment pictures are still the makers' pictures and must be replaced with our own generic Higgsfield pictures (planned for December 2026, with batch 10). The localStorage key stays `fressi.v1` so existing data survives. Plain HTML/CSS/ES-module JavaScript with **no build step, no package manager and no tests**. `SPEC.md` holds the original requirements; `README.md` holds the user-facing setup guide (GitHub Pages, phone install, Google Sheets sync).
 
-- App source: `docs/` (GitHub Pages serves `main` branch, `/docs` folder) → https://erez7673.github.io/fressi-workout/
+- App source: `docs/` (GitHub Pages serves `main` branch, `/docs` folder) → https://erez7673.github.io/rep12/ (repo `erez7673/rep12`, formerly `fressi-workout`)
 - Sync backend: `apps-script/Code.gs` (Google Apps Script web app over a Google Sheet)
 - `Example App/` and `Fressi Gym equipment/` are reference photos only; they are git-ignored and must never be published.
 

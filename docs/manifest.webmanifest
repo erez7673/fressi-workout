@@ -1,7 +1,7 @@
 {
-  "name": "Fressi Workout",
-  "short_name": "Fressi",
-  "description": "Personal workout plans, timers and machine guide for Fressi Jätkäsaari.",
+  "name": "Rep12",
+  "short_name": "Rep12",
+  "description": "Personal 12-week workout plans, timers and a machine guide for your gym.",
   "id": "./",
   "start_url": "./#/plan",
   "scope": "./",

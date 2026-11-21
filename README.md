@@ -1,6 +1,10 @@
-# Fressi Workout
+# Rep12
 
-A personal workout app (installable web app) for Android and iPhone, built for Fressi Jätkäsaari, Helsinki.
+A free workout app (installable web app) for Android and iPhone: personal 12-week gym plans, timers and a machine guide.
+
+**Open the app:** https://erez7673.github.io/rep12/
+
+> Rep12 gives general fitness guidance, not medical advice. If you have an injury or a health condition, check with a doctor or physiotherapist before you start.
 
 - Ready-made beginner plans for women 50+ (2 or 3 full-body days with 6 exercises, or 3 short days with 4; 2–3 sets of 10–15 reps), fully editable per day
 - 12-week plans built from your stats, goal, schedule, injuries and focus areas: 4 exercises × 4 sets per day, plus warm-up, optional cardio finisher and cooldown
@@ -11,8 +15,8 @@ A personal workout app (installable web app) for Android and iPhone, built for F
 - Set timer, automatic rest countdown with a beep at the end, screen kept awake during workouts
 - Light / dark mode (button on My Plan, or Profile → Appearance; Auto follows the phone)
 - Automatic progression: weight goes up when you hit the top of the rep range on every set
-- ~100 exercises with step-by-step instructions and a picture of the equipment (from the [gym80](https://gym80.de/en/product/) and [Matrix](https://world.matrixfitness.com/eng/cardio/catalog) catalogues, loaded from their sites and cached for offline use; mapping in `docs/js/pictures.js`)
-- Gym Setup for Fressi Jätkäsaari + "What is this machine?" photo picker for unknown machines
+- ~100 exercises with step-by-step instructions and a picture of the equipment, and video clips for most exercises
+- Gym Setup (switch off what your gym doesn't have) + "What is this machine?" photo picker for unknown machines
 - Progress charts (strength, body weight, workouts per week), workout history
 - Two (or more) profiles, synced between phones through a Google Sheet
 - Works offline at the gym
@@ -22,22 +26,24 @@ The Google Sheet sync script is in [`apps-script/Code.gs`](apps-script/Code.gs).
 
 ---
 
-## 1. Publish on GitHub Pages (free)
+## 1. Host your own copy on GitHub Pages (optional)
 
-1. On github.com, create a new repository, e.g. `fressi-workout` (public, as free GitHub Pages needs that).
+You can simply use the link above. To run your own copy:
+
+1. On github.com, create a new repository, e.g. `rep12` (public, as free GitHub Pages needs that).
 2. Upload this project. Either:
    - **Web:** on the repo page, click **Add file → Upload files** and drag in the `docs` folder, `apps-script` folder and `README.md`. Don't upload the photo folders.
    - **Command line:** from this folder:
      ```powershell
      git init
      git add docs apps-script README.md .gitignore
-     git commit -m "Fressi Workout app"
+     git commit -m "Rep12 app"
      git branch -M main
-     git remote add origin https://github.com/erez7673/fressi-workout.git
+     git remote add origin https://github.com/<your-user>/rep12.git
      git push -u origin main
      ```
 3. In the repo: **Settings → Pages → Build and deployment → Source: Deploy from a branch**, Branch: `main`, folder: **`/docs`**, then **Save**.
-4. After a minute the app is at **https://erez7673.github.io/fressi-workout/**.
+4. After a minute the app is at **https://<your-user>.github.io/rep12/**.
 
 ## 2. Install on your phones
 
@@ -50,7 +56,7 @@ Open it from the home-screen icon. The first screen creates your profile and pla
 
 Sync backs up both profiles and the gym setup and keeps both phones in step.
 
-1. Create a new Google Sheet (any name, e.g. "Fressi Workout data").
+1. Create a new Google Sheet (any name, e.g. "Rep12 data").
 2. **Extensions → Apps Script**. Delete the sample code and paste all of [`apps-script/Code.gs`](apps-script/Code.gs). Save.
 3. **Project Settings (⚙) → Script properties → Add script property**: name `SECRET`, value = a long password you make up. Save.
 4. **Deploy → New deployment → ⚙ Select type: Web app**
@@ -79,7 +85,7 @@ The key stays inside your Google Script and never goes to the phones.
 - **During a workout:** the black header shows the current set. Adjust reps/kg in the table, tap ✓ to log it. The rest timer starts automatically and beeps at the end (keep the phone's volume up). Changing kg on a set carries over to the remaining sets.
 - **Starting weights are estimates.** Adjust them in your first week; after that the app progresses from what you actually logged.
 - **Swap an exercise:** on a day preview, tap ⋯ next to an exercise.
-- **Gym tab:** turn equipment on/off (items marked *confirm* weren't visible in the gym photos – check them next time), then **Rebuild my plan**.
+- **Gym tab:** turn equipment on/off to match your gym, then **Rebuild my plan**.
 - **Unknown machine?** Gym tab → **Add a machine with a photo**, answer a few questions about how it moves, and pick the match (or create a custom exercise with generated instructions).
 - **Backup:** Profile → Export file / Import file.
 

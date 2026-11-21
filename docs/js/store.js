@@ -2,7 +2,7 @@
 import { EXERCISES } from './exercises.js';
 import { EQUIPMENT } from './equipment.js';
 
-const KEY = 'fressi.v1';
+const KEY = 'fressi.v1'; // old app name; kept so existing data on phones is not lost
 
 const blank = () => ({
   v: 1,

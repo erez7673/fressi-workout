@@ -1,5 +1,5 @@
 /**
- * Fressi Workout – Google Sheets sync backend (Google Apps Script web app).
+ * Rep12 – Google Sheets sync backend (Google Apps Script web app).
  *
  * Setup (details in README.md):
  *  1. Create a Google Sheet, then Extensions → Apps Script, and paste this file.
@@ -29,7 +29,7 @@ function doPost(e) {
 }
 
 function doGet() {
-  return json({ ok: true, app: 'fressi-sync', hint: 'Use POST from the app.' });
+  return json({ ok: true, app: 'rep12-sync', hint: 'Use POST from the app.' });
 }
 
 function json(obj) {
@@ -131,7 +131,7 @@ function identify(imageBase64) {
         role: 'user',
         content: [
           { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imageBase64 } },
-          { type: 'text', text: 'This is a photo of a machine in a commercial gym (brands are usually Gym80 or Matrix). Identify the machine and the main exercise done on it: how the user is positioned, what they hold or push against, the movement, and the muscles worked.' },
+          { type: 'text', text: 'This is a photo of a machine in a commercial gym. Identify the machine and the main exercise done on it: how the user is positioned, what they hold or push against, the movement, and the muscles worked.' },
         ],
       }],
     }),

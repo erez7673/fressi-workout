@@ -162,7 +162,7 @@ export function gymView() {
   const on = EQUIPMENT.filter(e => eqOn(e.id)).length + state.gym.machines.filter(m => m.on !== false).length;
   const machines = state.gym.machines;
   return {
-    html: `<header class="top"><div><h1>Gym Setup</h1><p class="sub">Fressi Jätkäsaari · ${on}/${total} items on</p></div></header>
+    html: `<header class="top"><div><h1>Gym Setup</h1><p class="sub">${on}/${total} items on · switch off what your gym doesn't have</p></div></header>
       <button class="btn primary big" data-act="go" data-href="#/identify">${icon.camera} Add a machine with a photo</button>
       <p class="muted small">Items marked <span class="pill warnpill">confirm</span> weren't visible in the gym photos – tick them on or off next time you're there. The plan only uses items that are on.</p>
       ${machines.length ? `<h3>My machines</h3><div class="exlist">${machines.map(m => {
@@ -173,7 +173,7 @@ export function gymView() {
           <button class="iconbtn" data-act="machine-menu" data-id="${m.id}">${icon.dots}</button></div>`;
       }).join('')}</div>` : ''}
       ${EQUIP_CATS.map(cat => `<h3>${esc(cat)}</h3><div class="card list">${EQUIPMENT.filter(e => e.cat === cat).map(e => `
-        <label class="eqrow"><span class="eqname">${eqThumb(e.id)}<span>${esc(e.name)}${e.seen ? '' : ' <span class="pill warnpill">confirm</span>'}</span></span>
+        <label class="eqrow"><span class="eqname">${eqThumb(e.id)}<span>${esc(e.name)}</span></span>
         <input type="checkbox" class="switch" ${eqOn(e.id) ? 'checked' : ''} data-change="eq-toggle" data-id="${e.id}"></label>`).join('')}</div>`).join('')}
       <div class="card"><p><b>Changed the equipment?</b> Rebuild your plan so it only uses what's on.</p><button class="btn" data-act="rebuild-plan">Rebuild my plan</button></div>`,
   };
@@ -238,7 +238,7 @@ export function identifyView() {
         <input type="file" accept="image/*" capture="environment" data-change="wiz-photo" hidden></label>
       <label class="field"><span>Name (if you know it)</span><input value="${esc(wiz.name)}" data-input="wiz-text" data-f="name" placeholder="e.g. Seated row"></label>
       <div class="two">
-        <label class="field"><span>Brand</span><select data-change="wiz-text" data-f="brand"><option value="">Unknown</option>${['Gym80', 'Matrix', 'Other'].map(b => `<option ${wiz.brand === b ? 'selected' : ''}>${b}</option>`).join('')}</select></label>
+        <label class="field"><span>Brand</span><input value="${esc(wiz.brand)}" data-input="wiz-text" data-f="brand" placeholder="optional"></label>
         <label class="field"><span>Model (on the frame plate)</span><input value="${esc(wiz.model)}" data-input="wiz-text" data-f="model" placeholder="optional"></label>
       </div>
       ${state.settings.aiEnabled ? `<button class="btn" data-act="wiz-ai" ${wiz.photo ? '' : 'disabled'}>✨ Identify with AI</button>` : ''}

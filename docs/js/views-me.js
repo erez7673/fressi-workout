@@ -60,7 +60,7 @@ export function onboardView(edit) {
   return {
     full: first,
     html: `<header class="bar">${first ? '<span></span>' : `<button class="iconbtn" data-act="back">${icon.back}</button>`}<h2>${edit ? 'Edit profile' : first ? 'Welcome 👋' : 'New profile'}</h2><span></span></header>
-      ${first ? '<p class="lead">Let\'s build your personal plan for Fressi Jätkäsaari. You can add your partner\'s profile afterwards.</p>' : ''}
+      ${first ? '<p class="lead">Let\'s build your personal plan. You can add more profiles afterwards, for example for a partner.</p><p class="muted small">This app gives general fitness guidance, not medical advice. If you have an injury or a health condition, or haven\'t trained for a long time, check with a doctor or physiotherapist first. Stop any exercise that hurts.</p>' : ''}
       ${profileForm(edit ? 'edit' : 'new')}
       ${edit ? '<p class="muted small">Exercises per day, muscle areas, session length, warm-up, cardio, injuries and extra focus are under Profile → Build your custom plan.</p>' : ''}`,
   };
@@ -139,7 +139,7 @@ export function profileView() {
         <a class="eqrow" href="#/custom"><span>Build your custom plan</span>${icon.chev}</a>
         <button class="eqrow" data-act="tpl-open"><span>Ready-made plans (beginner, 50+)</span>${icon.chev}</button>
         <button class="eqrow" data-act="switch-profile"><span>Switch profile</span><span class="muted">${profileList().length} profiles ${icon.chev}</span></button>
-        <a class="eqrow" href="#/onboard"><span>Add a profile (partner)</span>${icon.plus}</a>
+        <a class="eqrow" href="#/onboard"><span>Add a profile</span>${icon.plus}</a>
         <a class="eqrow" href="#/gym"><span>Gym setup</span>${icon.chev}</a>
       </div>
 
@@ -157,7 +157,7 @@ export function profileView() {
 
       <h3>Sync with Google Sheets</h3>
       <div class="card">
-        <p class="muted small">Backs up both profiles and the gym setup, and keeps both phones in sync. Set-up steps are in the README.</p>
+        <p class="muted small">Backs up all profiles and the gym setup to your own Google Sheet, and keeps your phones in sync. Set-up steps are in the README.</p>
         <label class="field"><span>Apps Script web app URL</span><input id="syncUrl" value="${esc(st.syncUrl)}" placeholder="https://script.google.com/macros/s/…/exec"></label>
         <label class="field"><span>Secret key (same as in the script)</span><input id="syncKey" value="${esc(st.syncKey)}" placeholder="your shared secret"></label>
         <div class="btnrow"><button class="btn" data-act="save-sync">Save</button><button class="btn primary" data-act="sync-now" ${syncEnabled() ? '' : 'disabled'}>${icon.sync} Sync now</button></div>
@@ -171,7 +171,10 @@ export function profileView() {
         <label class="btn">Import file<input type="file" accept="application/json" hidden data-change="import"></label>
       </div>
       <button class="btn ghost danger" data-act="del-profile">Delete ${esc(p.name)}'s profile</button>
-      <p class="muted small center">Fressi Workout · v1.0</p>`,
+      <h3>About</h3>
+      <div class="card"><p class="muted small">Your data stays on this phone. Nothing is sent anywhere unless you set up Google Sheets sync, which sends it only to your own sheet.</p>
+        <p class="muted small">This app gives general fitness guidance, not medical advice. If you have an injury or a health condition, check with a doctor or physiotherapist before you start. Stop any exercise that hurts.</p></div>
+      <p class="muted small center">Rep12 · v1.0</p>`,
   };
 }
 
@@ -193,7 +196,7 @@ register({
     const blob = new Blob([JSON.stringify({ ...state, session: null }, null, 1)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `fressi-backup-${today()}.json`;
+    a.download = `rep12-backup-${today()}.json`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   },
@@ -201,7 +204,7 @@ register({
     const f = el.files?.[0]; if (!f) return;
     try {
       const data = JSON.parse(await f.text());
-      if (!data.profiles) throw new Error('Not a Fressi backup');
+      if (!data.profiles) throw new Error('Not a backup file from this app');
       if (!confirm('Replace all data on this phone with the backup?')) return;
       data.settings = { ...data.settings, ...state.settings };
       replaceState(data); toast('Backup restored'); location.hash = '#/plan'; rerender();
