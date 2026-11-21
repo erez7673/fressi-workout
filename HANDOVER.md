@@ -2,31 +2,30 @@
 
 Read this together with `CLAUDE.md` (the "Exercise animations" section holds the full rules). This file records where the work stands and every approved Higgsfield still, so a new chat can continue without redoing anything.
 
-_Last updated 2026-11-20, after batch 7._
+_Last updated 2026-11-21, after batch 8._
 
 ## Where things stand
 
-- **Done and in the app:** 71 exercises have male + female clips (`VIDEOS` in `docs/js/anim.js`): leg press plus batches 1–7.
-- **Git:** batches 1–6 are pushed (last commit `496d73a`). **Batch 7 is NOT committed yet.** Uncommitted:
-  - `docs/js/anim.js`
-  - `CLAUDE.md`
-  - 40 files in `docs/media/anim/`
-  - this file
-  - `tools/clips/`
-- **Credits:** 148.66 Higgsfield credits left. A batch of 10 costs about 50–65.
+- **Done and in the app:** 79 exercises have male + female clips (`VIDEOS` in `docs/js/anim.js`): leg press plus batches 1–8.
+- **Git:** batches 1–7 are pushed (last commit `222b2f9`; batch 7 includes the face-down `back-ext` redo). **Batch 8 is NOT committed yet**: 32 files in `docs/media/anim/`, `docs/js/anim.js`, this file and `tools/clips/` (`b8ids.txt`, `align2.py`).
+- **Credits:** 66.16 Higgsfield credits left. Images cost 0.25; a seedance video costs about 2. Batch 8 used about 77 credits because of retries.
 - **Workflow with the user:** generate 10 exercises per batch, then send a review video and wait. When the user answers "Yes, push and continue", commit and push, then start the next batch. Never push without that answer.
 
-## Still to do (25 exercises, cardio excluded)
+## Still to do (17 exercises, cardio excluded)
 
 | Group | Exercise ids |
 |---|---|
 | Chest leftovers | `cable-fly-low`, `cable-fly-high`, `incline-db-fly` |
 | Lunge leftover | `smith-split-squat` |
-| Glutes | `hip-thrust`, `smith-hip-thrust`, `glute-bridge`, `abductor`, `adductor`, `cable-kickback` |
-| Calves | `smith-calf`, `leg-press-calf`, `db-calf`, `calf-machine` |
+| Calves (hard, see below) | `smith-calf`, `leg-press-calf` |
 | Core | `plank`, `side-plank`, `knee-raise`, `hanging-leg-raise`, `cable-crunch`, `woodchop`, `db-woodchop`, `pallof`, `dead-bug`, `ab-machine`, `rotary-torso` |
 
-Suggested batch 8: the glutes, the calves, `smith-split-squat` and `incline-db-fly`.
+**Calf raises that failed in batch 8:** the video model turns a small ankle movement into a big one.
+- `smith-calf` (3 tries, male and female): a single-still loop becomes a squat (the knees bend), even with "NOT a squat, knees locked" in the prompt. Edited top and bottom stills redraw the machine from a different angle, so the camera drifts.
+- `leg-press-calf`: the female clip bent the knees like a leg press in both tries. The male single-still clip worked (job `143c5fbc-166d-4f14-a398-fa8892268b19`; the loop is saved in the scratchpad only). Its start still is `b66c1b44-7a96-4741-947b-0e44fc1221dc`, the female start still is `e347c6bb-fa7b-4c11-9d51-302a29846862`.
+- Ideas: a side view where only the feet are framed large, or a calf raise drawn as an SVG in `DEFS` instead of a clip.
+
+Suggested batch 9: the 3 chest leftovers, `smith-split-squat` and 6 core exercises.
 
 Static holds (`plank`, `side-plank`) need only a gentle breathing or hold motion.
 
@@ -202,6 +201,26 @@ Batch 7 alignment shifts (`dx` for `align.py make`, male / female):
 
 The first back-ext clips were wrong: the body lay face-up, like a backbend. A back extension is face-down: the hips rest on the pad, the chest faces the floor and you see the back of the head. The male video came out reversed (bottom → top), so it was flipped with `-vf reverse` before `bounce.sh`; check each video's direction.
 
+### Batch 8: glutes and calves
+
+Start → end stills as used for the videos (job IDs or uploaded media IDs). "Pair" = 21:9 pair cut with `align.py`; "edit" = the end still is an edit of the start still (checked with `align2.py`); "single" = start = end, and the video plays a full rep that is used as the loop without `bounce.sh`.
+
+| Exercise | Method | Male start → end | Female start → end |
+|---|---|---|---|
+| hip-thrust | edit | 0a2a8e90-53ec-4776-8c95-02762b55886c → 15435f0f-54b9-4a10-8631-8373a61b8f38 (video was a full rep, used without bounce) | 20a54e10-1da8-45a2-bf43-5b662b7335b5 → 411910da-eb1e-4b08-b03b-49db01c05f4b |
+| smith-hip-thrust | edit | 73c497c9-09a6-49d4-a149-1794eb746e0a → 9e0832ee-6516-416a-abb7-9a1583f413d6 | 56e68679-0d7e-46ab-a2e8-8596471a8ddb → 2efc15a0-18d7-4bc1-a462-e4efa192fc76 |
+| glute-bridge | pair (64db04e7 / 790d596a) | f7e145f6-2113-4b0f-ad51-4fd0a5ab9807 → d715c886-b95a-426b-a7a2-578a217c3aa2 | c46db44b-d778-46ef-a8c8-ebd6af9fa56a → 6763d3bf-7fe2-4dbe-8897-4075747f7752 |
+| abductor | edit | 027aeb04-d112-4be4-ab7e-d8c84afaebd3 → 774afeb0-73c6-4f07-bc00-090fa0cbf86b | 59dec49d-14b6-46fe-ac7d-5fee01833c84 → 0dd637a5-84e0-47ab-9114-1fae00fb431b |
+| adductor | pair (fc86e897 / 0d65344c) | b2227a5f-e913-4efd-a72d-008b3e2ca49e → ab3ae09d-54aa-48ef-8d72-fface44a5de0 | a4422e23-136f-40bc-93a4-57c4e0e9b359 → 52c6739f-e868-4201-8309-45072ce1790c |
+| cable-kickback | pair (3ffeb06f / 2d4e09aa) | 21086155-435d-42dc-ae24-005683268f35 → 4b284230-e7f5-4a14-8122-020762628119 | ff2b8f1a-acad-4900-9714-fccea381d25c → 0f6b3b2e-453e-43e2-a7bd-199ab9d50a7d |
+| db-calf | pair (d52a6b2d / 8104d5f3) | 2451e28d-d691-4e94-8464-f3a868543fdd → d69b36e1-b563-49ee-82e2-8a1ae107bf56 | 2b5323b4-e3c3-4714-8746-cac85a73cb71 → 3d66b81a-e1cb-4fc4-861f-fa43af52a395 |
+| calf-machine | pair (35c135bd / 9814974a) | 5e038c18-e228-4c2e-8863-d822bcd49870 → b6df70df-c2e6-4421-aa75-53dc688123ca | 8ebba6f3-af68-4e6d-a5ec-54c36cb784bd → c7142c87-e493-406c-bdd7-72034abcdef6 |
+
+Batch 8 lessons:
+- **Hip thrusts:** 21:9 pairs let the feet slide sideways between the halves. Editing one still ("feet stay planted in exactly the same spot") worked better.
+- **When an edit seems to zoom:** check it with `tools/clips/align2.py A.png B.png box:x0,x1,y0,y1 out.png ov.png`. It finds the scale and shift that line up the equipment.
+- **Known flaw, `db-calf`:** the person stands on their toes just in front of the step instead of on its edge.
+
 **Good references for new exercises:**
 - **Standing with dumbbells, three-quarter view:** db-rdl male top `6e6a66c8-97bb-41b3-ae30-9e76e06b5fc9`, db-lunge male top `f0dea8c5-cf15-4552-b90d-6b37d3cefc0f`.
 - **Standing barbell:** `1329aae5-b9e3-4de7-89a5-886d52763b79`.
@@ -216,6 +235,7 @@ The first back-ext clips were wrong: the body lay face-up, like a backbend. A ba
   - `stills.sh` plus `sheet.py`: contact sheet of stills.
   - `grab.sh`: frame strips from videos.
   - `split.sh`, `align.py`, `pairs.sh`: keyframe pairs.
+  - `align2.py`: scale-and-shift alignment of an edited still onto its base still.
   - `put.sh`: uploads.
   - `bounce.sh`: loop plus overlay check.
   - `enc.sh`: encode into `docs/media/anim`.

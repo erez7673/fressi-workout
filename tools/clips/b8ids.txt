@@ -1,0 +1,22 @@
+# batch 8 male pairs (21:9), try 1
+0 hip-thrust 29068b83-c6bf-45d8-a068-e4065aed0f5d
+1 smith-hip-thrust 8bedfa7b-560d-4257-905d-b47624641241
+2 glute-bridge 64db04e7-e20e-4e3f-874e-969f9f758f7a
+3 abductor b0fc4271-ffb7-469f-a889-026ab093c886
+4 adductor fc86e897-af06-449d-ad82-dc070514e48e
+5 cable-kickback 3ffeb06f-f0cc-46ae-8acb-26674441970d
+6 smith-calf 054f35f7-d068-43e3-802a-11c08bee4883
+7 leg-press-calf 68e07bce-952a-4f70-971e-98ff5c4ccafd
+8 db-calf d52a6b2d-1083-4514-a5d8-3426543ffdc8
+9 calf-machine 35c135bd-4eca-483d-8058-b875c4cc2036
+# redo male pairs: 6 smith-calf 719591bf-17be-4ec7-aa02-bbb351ffe23c, 7 leg-press-calf 5142a516-2850-494b-8e58-20038a0ad19d
+# female pairs: 0 ac10b46f-247d-4691-a805-652ddeedd83d 1 94517ccb-af13-4cec-84b6-b052bf59abea 2 790d596a-261e-44e7-a94a-f96f50c6a230 3 d3be982e-0ec3-437e-a70d-631c7e9aece2 4 0d65344c-498e-4130-8803-4db30d1dfd38 5 2d4e09aa-7f3f-4c94-bccd-b64b79372154 8 8104d5f3-eb30-4320-8e17-a3cb9d1cae2e 9 9814974a-7ab7-46a1-8283-3b2536aa62db
+# edit route: uploads hipthrust-top 0a2a8e90-53ec-4776-8c95-02762b55886c smithhip-top 73c497c9-09a6-49d4-a149-1794eb746e0a abductor-start 027aeb04-d112-4be4-ab7e-d8c84afaebd3 smithcalf-top 804174a4-11cb-4819-9be4-460b904b82c9
+# lp-calf start b66c1b44-7a96-4741-947b-0e44fc1221dc ; edits 0 15435f0f 1 9e0832ee 3 774afeb0 6 44e038b4 ; female base 0 20a54e10 1 56e68679 3 59dec49d 6 b5f2438b
+# lp-calf male end afe29037-4f17-45a3-a2a4-48190799d6be ; female ends 0 411910da 1 2efc15a0 3 0dd637a5 6 42aec730 7 6128a598
+# male pair-route uploads a/b: 2 f7e145f6/d715c886 4 b2227a5f/ab3ae09d 5 21086155/4b284230 8 2451e28d/d69b36e1 9 5e038c18/b6df70df
+# male videos: 0 3d447feb-f0fa-4193-971e-2a66d560999d 1 bbe3fa79-c735-4ad7-8a3a-18431b9264ae 2 b675f4b8-0a5c-4194-9fff-ea939fa3597e 3 2f27778c-d7a0-4be2-82c6-4cf167ea3388 4 7f46a9a3-c2aa-41a6-b0c8-a292956188bb 5 1e47886f-c2ec-42f2-820e-c9dc66b3f654 6 a3fce7ec-4573-4d9d-aaf2-84a586c9525d 7 8bba8f93-531f-488d-a06e-061a79b46c3c 8 15912313-a4f0-416c-bfed-4bb56567c637 9 af8198b5-94bb-4e41-8165-b8be82ddaa4f
+# female videos: 0 6154c5e1 1 3fe7779e 2 c78014e4 3 7fb3e29b 4 d99ae181 5 939a79fb 6 5f011ad7(single) 7 2f9ef9da(single) 8 86dd0a75 9 6e006a0f ; male redo 6 56571cf6 7 143c5fbc (single still)
+# male video 0 (hip-thrust) came back as a full rep -> used as loop without bounce; male 6/7 first tries rejected (camera drift / knees bend)
+# rejected: fv6 / mv6 redo (squat), fv7 (knees bend). male lp-calf 143c5fbc accepted (single still, used as loop directly)
+# 3rd tries rejected: smith-calf m/f squat, lp-calf f knees bend. Dropped smith-calf + leg-press-calf from batch 8. Kept male lp-calf clip in scratch keep/ (143c5fbc)
