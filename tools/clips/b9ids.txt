@@ -1,0 +1,47 @@
+# batch 9 male keyframes (pairs 21:9 unless noted; 4,5 single 1:1)
+0 cable-fly-low 62570c1d-4451-4889-be1d-b04a54666c5b
+1 cable-fly-high fe1f74f0-955c-4e0b-b5cd-8f1200373396
+2 incline-db-fly 8bd1f26b-7a9b-4578-9854-960ff1d7b2cc
+3 smith-split-squat 173869c5-cf68-4737-acea-5f7d8e04c30a
+4 plank e40c637e-01d7-4443-8ecd-c00ec26e397e
+5 side-plank 7fe2293c-85b8-4344-83fa-e3bf882ab213
+6 knee-raise 588610fe-f6d2-42f4-af1e-896fac331ca6
+7 hanging-leg-raise 6b6a0bb2-0334-4277-9046-619e49d06a85
+8 cable-crunch 99a1d8d1-73db-4188-8661-e038f5137ac0
+9 dead-bug c052e401-5802-4ea2-b5e4-a1b3073a0264
+# redo: 2 incline (flat bench) and 6 knee-raise (sitting)
+# redo results: 2 incline 68e6ddbd, 6 knee-raise 755b511c
+up0-a 3091c15e-f1a8-4848-8f32-0e429575de62 200
+up0-b 176a8652-e5b7-4e29-adf9-b7ec2b3f29c9 200
+up1-a fd7f64e2-1a76-429c-b3bd-9f2fa6e2cc80 200
+up1-b 27b30458-2424-4985-a8ad-35dd31731c4b 200
+up2-a ab7fc761-33e2-426a-8055-61ab7bd58400 200
+up3-a 5415db21-b0e8-4141-9b26-7d231baab7d1 200
+up3-b 75593ff6-64e6-4a6e-8e26-c3070655b5e0 200
+up6-a 42edf65d-8231-466f-88cc-d3f06a847c71 200
+up6-b 145dab8c-0469-4900-9e0c-9a26d96693e8 200
+up7-a b62c4ca9-bbd6-4c35-8c3a-d5e519dd53dc 200
+up7-b a93d08bd-8f9a-46cf-ac2d-5a5d87238054 200
+up8-a 5ceadd07-081a-4db0-8f30-6925c4a87f86 200
+up8-b 99e38c3e-44da-4c62-9ee5-be38d6c63482 200
+up9-a 55c959b1-b8fb-4c14-9619-eab907f9a4a5 200
+# male edits: 2 incline end c6eb3268 (start upload ab7fc761), 9 dead-bug end 8f822f2b (start 55c959b1)
+# female: pairs 0 507f2fc1 1 347720ff 3 4b1d74fc 6 84ceab8a 7 8f841e23 8 0cd5ba09 ; base 2 61b30aa3 9 ab8fe392 ; single 4 f124cee8 5 7fc6b4e4
+# male videos: 0 de325a86 1 d68c27d1 3 cf34bb0f 4 71b66dea 5 6e76cc76 6 962a4bf0 7 ef06ae9d 8 d29f3099
+fu0-a a36fa9d2-4e61-4fdf-a344-6a0257ada51a 200
+fu0-b feb6f2d5-d21f-4a30-bed1-22d3918f1b35 200
+fu1-a cbcfd9f3-2ed5-4b77-99fa-edad3cc59d79 200
+fu1-b 16374901-f7f5-4c3d-9026-33c46350429c 200
+fu3-a fb324655-292c-48de-b252-788aa58e5dd2 200
+fu3-b 2dabe24f-77ca-4894-bae5-8ffc00a92adf 200
+fu6-a 99e54366-5d78-41db-8703-b48435da59b2 200
+fu6-b 2bdd26ee-ed79-4af9-8e51-91e1921123ac 200
+fu7-a a5fcc080-f61c-4ce9-8596-7ae98cb79cc2 200
+fu7-b 1f15e016-32fb-4cde-ba2f-4a9f32d74494 200
+fu8-a 659c950d-8ae9-459a-b418-00b4e91fd33c 200
+fu8-b 7b6b9000-ea6f-43d4-9635-0de1dd161728 200
+# female ends 2 b796a6fc 9 ee03f2e3
+# videos 2: male 2 e7404d8e 9 c1267e93; female 0 01f36598 1 31e9fa4c 2 248c81d7 3 1a284de9 4 dde62cc5 5 503a3a4e 6 16d6044e 7 aa89022a 8 4f41ec78 9 a80b40a7
+# rejected: mv9/fv9 dead bug (3rd leg), fv6 knee raise (zoom). accepted rest.
+# fv6 retry 946543c9 accepted
+# dead bug retries 8befbf16 / b3a33735 accepted

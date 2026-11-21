@@ -2,30 +2,29 @@
 
 Read this together with `CLAUDE.md` (the "Exercise animations" section holds the full rules). This file records where the work stands and every approved Higgsfield still, so a new chat can continue without redoing anything.
 
-_Last updated 2026-11-21, after batch 8._
+_Last updated 2026-11-21, after batch 9._
 
 ## Where things stand
 
-- **Done and in the app:** 79 exercises have male + female clips (`VIDEOS` in `docs/js/anim.js`): leg press plus batches 1–8.
-- **Git:** batches 1–7 are pushed (last commit `222b2f9`; batch 7 includes the face-down `back-ext` redo). **Batch 8 is NOT committed yet**: 32 files in `docs/media/anim/`, `docs/js/anim.js`, this file and `tools/clips/` (`b8ids.txt`, `align2.py`).
-- **Credits:** 66.16 Higgsfield credits left. Images cost 0.25; a seedance video costs about 2. Batch 8 used about 77 credits because of retries.
+- **Done and in the app:** 89 exercises have male + female clips (`VIDEOS` in `docs/js/anim.js`): leg press plus batches 1–9.
+- **Git:** batches 1–8 are pushed (last commit `f64c1e3`). **Batch 9 is NOT committed yet**: 40 files in `docs/media/anim/`, `docs/js/anim.js`, this file and `tools/clips/` (`b9ids.txt`, `check.sh`).
+- **Credits: 0.66 left. Nothing more can be generated until the user tops up.** Images cost 0.25. A seedance video costs 2–2.5. Batch 9 used about 65 credits.
+- **Always check the balance BEFORE sending a batch,** never in the same step.
 - **Workflow with the user:** generate 10 exercises per batch, then send a review video and wait. When the user answers "Yes, push and continue", commit and push, then start the next batch. Never push without that answer.
 
-## Still to do (17 exercises, cardio excluded)
+## Still to do (7 exercises, cardio excluded)
 
 | Group | Exercise ids |
 |---|---|
-| Chest leftovers | `cable-fly-low`, `cable-fly-high`, `incline-db-fly` |
-| Lunge leftover | `smith-split-squat` |
 | Calves (hard, see below) | `smith-calf`, `leg-press-calf` |
-| Core | `plank`, `side-plank`, `knee-raise`, `hanging-leg-raise`, `cable-crunch`, `woodchop`, `db-woodchop`, `pallof`, `dead-bug`, `ab-machine`, `rotary-torso` |
+| Core | `woodchop`, `db-woodchop`, `pallof`, `ab-machine`, `rotary-torso` |
 
 **Calf raises that failed in batch 8:** the video model turns a small ankle movement into a big one.
 - `smith-calf` (3 tries, male and female): a single-still loop becomes a squat (the knees bend), even with "NOT a squat, knees locked" in the prompt. Edited top and bottom stills redraw the machine from a different angle, so the camera drifts.
 - `leg-press-calf`: the female clip bent the knees like a leg press in both tries. The male single-still clip worked (job `143c5fbc-166d-4f14-a398-fa8892268b19`; the loop is saved in the scratchpad only). Its start still is `b66c1b44-7a96-4741-947b-0e44fc1221dc`, the female start still is `e347c6bb-fa7b-4c11-9d51-302a29846862`.
 - Ideas: a side view where only the feet are framed large, or a calf raise drawn as an SVG in `DEFS` instead of a clip.
 
-Suggested batch 9: the 3 chest leftovers, `smith-split-squat` and 6 core exercises.
+Suggested batch 10: the 5 core exercises, plus another try at the two calf raises.
 
 Static holds (`plank`, `side-plank`) need only a gentle breathing or hold motion.
 
@@ -221,6 +220,23 @@ Batch 8 lessons:
 - **When an edit seems to zoom:** check it with `tools/clips/align2.py A.png B.png box:x0,x1,y0,y1 out.png ov.png`. It finds the scale and shift that line up the equipment.
 - **Known flaw, `db-calf`:** the person stands on their toes just in front of the step instead of on its edge.
 
+### Batch 9: chest leftovers, Smith split squat, core
+
+All raw job IDs, including rejected tries, are in `tools/clips/b9ids.txt`. Videos used:
+- **Pair route** (21:9 pair, split, `align2.py`, then upload): `cable-fly-low`, `cable-fly-high`, `smith-split-squat`, `knee-raise`, `hanging-leg-raise`, `cable-crunch`.
+  - The male `knee-raise` video was a full rep, so it is used without bounce.
+- **Edit route:** `incline-db-fly` (male start upload `ab7fc761-33e2-426a-8055-61ab7bd58400` → `c6eb3268-34a0-4e74-a742-ceca03fe2e49`, female `61b30aa3-be95-446a-8e68-7db98b9e3be5` → `b796a6fc-6542-48dc-8be7-350378d5ac13`) and `dead-bug` (male `55c959b1-b8fb-4c14-9619-eab907f9a4a5` → `8f822f2b-5485-4fc3-aaf4-36abd0cc81e4`, female `ab8fe392-0c4d-4750-b72c-f901c4ab80db` → `ee03f2e3-53d9-4044-b207-5d7cf60259a5`).
+- **Single still** (start = end, a "breathing hold" prompt, used without bounce): `plank` (male `e40c637e-01d7-4443-8ecd-c00ec26e397e`, female `f124cee8-1c39-4868-8bdf-3427ce25f244`) and `side-plank` (male `7fe2293c-85b8-4344-83fa-e3bf882ab213`, female `7fc6b4e4-0c5e-4363-b581-fe668f39ebbd`).
+
+Batch 9 lessons:
+- **Captain's chair:** say "NO seat, supported on the forearms", or the model draws a chair to sit on.
+- **Incline bench:** the first try came out flat. Editing the pair ("backrest raised 30°, head higher than hips") fixed it.
+- **Dead bug:** the first videos grew a third leg mid-move. Retrying with "exactly two arms and two legs the whole time; ONE bent leg straightens, the other stays" fixed it.
+- **Knee raise:** one female video zoomed in. Adding "wide shot, whole body and station in frame, no crop" fixed it.
+- **Hanging leg raise:** both clips swing a little at the start of the rep.
+- **Batch uploads:** a `media_upload` of 12 or more files overflows into a saved JSON file. Pass that file straight to `put.sh` (`put.sh <file> <dir> names…`), with no copy-pasting of URLs.
+- **`check.sh <dir> name=url …`:** downloads clips, builds the bounce loops and a review row per clip, and prints how different the start, middle and end frames are. When start ≈ end, the clip is already a full rep.
+
 **Good references for new exercises:**
 - **Standing with dumbbells, three-quarter view:** db-rdl male top `6e6a66c8-97bb-41b3-ae30-9e76e06b5fc9`, db-lunge male top `f0dea8c5-cf15-4552-b90d-6b37d3cefc0f`.
 - **Standing barbell:** `1329aae5-b9e3-4de7-89a5-886d52763b79`.
@@ -236,6 +252,7 @@ Batch 8 lessons:
   - `grab.sh`: frame strips from videos.
   - `split.sh`, `align.py`, `pairs.sh`: keyframe pairs.
   - `align2.py`: scale-and-shift alignment of an edited still onto its base still.
+  - `check.sh`: batch download, loop and review rows for finished videos.
   - `put.sh`: uploads.
   - `bounce.sh`: loop plus overlay check.
   - `enc.sh`: encode into `docs/media/anim`.
