@@ -6,13 +6,15 @@ _Last updated 2026-11-21, after batch 9._
 
 ## Where things stand
 
-- **Done and in the app:** 89 exercises have male + female clips (`VIDEOS` in `docs/js/anim.js`): leg press plus batches 1–9.
-- **Git:** batches 1–8 are pushed (last commit `f64c1e3`). **Batch 9 is NOT committed yet**: 40 files in `docs/media/anim/`, `docs/js/anim.js`, this file and `tools/clips/` (`b9ids.txt`, `check.sh`).
-- **Credits: 0.66 left. Nothing more can be generated until the user tops up.** Images cost 0.25. A seedance video costs 2–2.5. Batch 9 used about 65 credits.
+- **Paused until next month (December 2026).** The Higgsfield credits ran out after batch 9. When they are refilled next month, we finish the remaining animations (batch 10, below).
+- **Done and in the app:** 89 of the app's 103 exercises have male + female clips (`VIDEOS` in `docs/js/anim.js`): leg press plus batches 1–9.
+  - The other 14 are the 7 in the table below, plus 7 cardio machines that were never planned for clips.
+- **Git:** everything is committed and pushed (batch 9 is commit `da1264a`).
+- **Credits: 0.66 left. Nothing can be generated until the monthly refill.** Images cost 0.25. A seedance video costs 2–2.5. Batch 9 used about 65 credits. Batch 10 should need about 30.
 - **Always check the balance BEFORE sending a batch,** never in the same step.
 - **Workflow with the user:** generate 10 exercises per batch, then send a review video and wait. When the user answers "Yes, push and continue", commit and push, then start the next batch. Never push without that answer.
 
-## Still to do (7 exercises, cardio excluded)
+## Still to do next month (7 exercises, cardio excluded)
 
 | Group | Exercise ids |
 |---|---|
@@ -21,10 +23,13 @@ _Last updated 2026-11-21, after batch 9._
 
 **Calf raises that failed in batch 8:** the video model turns a small ankle movement into a big one.
 - `smith-calf` (3 tries, male and female): a single-still loop becomes a squat (the knees bend), even with "NOT a squat, knees locked" in the prompt. Edited top and bottom stills redraw the machine from a different angle, so the camera drifts.
-- `leg-press-calf`: the female clip bent the knees like a leg press in both tries. The male single-still clip worked (job `143c5fbc-166d-4f14-a398-fa8892268b19`; the loop is saved in the scratchpad only). Its start still is `b66c1b44-7a96-4741-947b-0e44fc1221dc`, the female start still is `e347c6bb-fa7b-4c11-9d51-302a29846862`.
+- `leg-press-calf`: the female clip bent the knees like a leg press in both tries. The male single-still clip worked (job `143c5fbc-166d-4f14-a398-fa8892268b19`). It was not committed and the scratchpad copy may be gone, so download it again from Higgsfield (`jobs_wait` with that job id gives the URL), then convert it with `-r 24` and `enc.sh`, without bounce. Its start still is `b66c1b44-7a96-4741-947b-0e44fc1221dc`, the female start still is `e347c6bb-fa7b-4c11-9d51-302a29846862`.
 - Ideas: a side view where only the feet are framed large, or a calf raise drawn as an SVG in `DEFS` instead of a clip.
 
-Suggested batch 10: the 5 core exercises, plus another try at the two calf raises.
+**Batch 10 (next month, after the credit refill):** the 5 core exercises, plus another try at the two calf raises.
+- First check the balance with `balance`.
+- After batch 10, every non-cardio exercise has a clip.
+- Cardio clips are optional and only if the user asks.
 
 Static holds (`plank`, `side-plank`) need only a gentle breathing or hold motion.
 
