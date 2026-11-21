@@ -187,6 +187,9 @@ const VIDEOS = new Set([
   // Batch 6
   'db-overhead-ext', 'skull-crusher', 'close-grip-smith', 'assisted-dip', 'triceps-machine',
   'bench-dip', 'bb-squat', 'smith-squat', 'goblet-squat', 'sumo-squat',
+  // Batch 7
+  'rdl', 'db-rdl', 'smith-rdl', 'deadlift', 'back-ext', 'cable-pull-through', 'db-lunge',
+  'reverse-lunge', 'split-squat', 'stepup',
 ]);
 
 export const hasAnim = (id) => VIDEOS.has(id) || !!DEFS[id];

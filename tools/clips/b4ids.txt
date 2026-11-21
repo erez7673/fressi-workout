@@ -1,0 +1,24 @@
+# batch 4 male stills
+0 reverse-pec-deck 899b9aea-7212-4d35-8231-2ed347075cea
+1 pullup cba5baaa-6986-4aaa-be8a-ff72986304ab
+2 straight-arm-pulldown 8f2d80f6-8026-4ae8-ba51-0e2a626a4dc7
+3 crossover-row 7d0968c6-0ef4-4be9-bd34-79d6f151dc19
+4 plate-row bb81d72a-c01f-4286-9532-19ea9528b700
+5 db-row 735cd611-fa63-4940-83cd-0800ade3f3b8
+6 incline-db-row de69e55a-ee88-4b81-bd37-b4f8c45d1e46
+7 bb-row 0b58ae5f-2668-4273-9c74-88f199972eed
+8 trx-row 97ae1835-c2a2-4889-88f9-8a3a4f3d14a7
+9 db-shrug cff626c0-ea62-470b-bff9-2f5bb11ad4d0
+plate-row male v2 02014824-e842-4619-9552-40af383f6ed1
+# female stills idx:id
+0:a0f83752-2ebf-4c5a-9d1c-acee5bfdca03 1:4778f2d0-4eeb-449e-b818-078c2a195fc4 2:4dabc2fb-23d1-474c-bad9-c99dd2c75f8c 3:6ffe3397-00f0-47b8-8d01-4f958d2e6e34 5:9c252676-f44a-4665-91fd-b512bccee459 6:7e8083fd-125b-4724-9a38-3133cad9185f 7:482ae6a9-decc-4bf9-b9a6-7be67a71fe21 8:cd161710-fba5-4a1c-ab88-8802f2486d0a 9:ed06ad2f-97d7-4a3b-af01-5762e5a69192
+# male videos idx:id
+0:bbfbfee8-50ec-416d-bdd5-06634552d54d 1:02253b47-75ea-49e8-830c-d0899e938c73 2:0aeacc1a-2127-4176-9151-5bf23a18c5b3 3:09b6ab3c-4535-474d-b261-07866b6621dc 5:6abafb33-1edd-4c2e-a95a-067a79247a34 6:6a053927-cea7-456c-80cd-c0bf67f3340d 7:b7d8d9aa-06d1-4941-9ffe-d33d11854e47 8:e958254a-679e-426d-83ea-1cdd10caf11c 9:5a521806-3435-4db5-ade5-4cd45040e213
+plate-row female still 5ed88202-efd1-40f6-8107-4c7cc4953032 ; plate-row male video bf0a38ec-2c39-477d-a197-3a6e8a01c596
+# female videos idx:id
+0:2df7886f-f19e-441b-b029-ef908f89c51b 1:f5e943a3-d313-48c0-be54-dcfc81d46378 2:bbe70dd0-4fcf-439a-918e-8c80504c2527 3:981eaca3-989a-4fa3-8ca4-fa0fbc00df7b 5:d996b8db-1158-48eb-b607-06b01e64840d 6:e000c5fb-ab22-496c-a319-653308d0ed71 7:82d1d1a8-1f1e-4ac0-9802-c1ce862ca5b9 8:a85ba7a0-6348-4b06-9383-ca72ea44ceca 9:5699b486-0237-4800-8ee0-16818343d459
+plate-row female video 1d997708-8ef6-448c-bf87-a6600540e4c4
+male redo bb-row f39f5421-6c1e-4631-85cd-3c9a4cc7b3f4 trx 1bbf5610-b101-4e22-bbe0-bcda0a33507c
+redo2: f-trx c75f2be4-c675-4fd8-a525-2921912f5b36 m-plate ae5b38cb-56b8-471d-9bc6-3619ae7b5127 f-plate 99ea5e0f-22ee-4065-adff-0a137bc2d035
+f-shrug redo ee941e10-c468-45ef-a7b4-d48b9585a535
+f-shrug redo2 38d8bf4f-d33c-4685-b2cb-d2f3531c0fa7

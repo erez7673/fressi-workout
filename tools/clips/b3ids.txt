@@ -1,0 +1,22 @@
+# batch 3 male stills
+0 db-shoulder-press de057056-764f-4dd8-8b61-725d6e28125c
+1 smith-ohp bad68235-4f7c-4673-ade0-0f71e2070058
+2 bb-ohp cc06fa5b-7ee6-428a-94f8-10006a2bf7eb
+3 arnold-press d8082e5d-aa2b-4bf5-8b54-865df9d5317b
+4 db-lateral 9bd5b36b-5bbf-416c-aa90-4faca062695d
+5 cable-lateral 88093b6d-72c7-4d96-949f-0c1e94771dbf
+6 face-pull 6c0b2f72-f3e5-4247-87ce-d456085d8a11
+7 db-rear-fly 689b350f-8687-4865-b839-85debb9a169b
+8 close-pulldown 765d6806-8038-4527-93ec-8ada01699fc0
+9 assisted-chin da025bcf-5627-4882-bb0c-0053027a2a04
+# female stills (0-9)
+cc925cd1-5933-470c-8a29-4477c5873775 0a7939ba-fdf6-447d-aa22-168f3799f1d7 fc55ab9f-d0d7-49d4-955a-ba3b53f3246e 4d993cd1-7d0d-49e1-9d9f-ebf7da851302 2b3fa396-fc41-4d1e-bb3e-955d66c9bdfb 5fd76932-acf6-49c1-88a6-71439a2d78fe b20bcd5d-c38f-48f7-99ba-29ef7ccb1bfa cf5f333f-92b1-40a5-a8bd-99491fcdaf51 94072adc-945e-4f3f-9ff6-12efb86639ae bbaccede-8358-4800-a7d6-55958999de99
+# male videos (0-9)
+57cf3a6e-897f-4801-b353-ead091683b58 c620679d-4189-4c8e-bf33-0f4c7b7e1a5e e570b042-aea3-4bbb-8e74-d3a033a4ed05 303e98be-b634-431f-b469-daa747622302 5a045b08-3935-478a-88e9-1184dd897a77 37bbabd8-0bf0-4015-a464-3d173599abda 88c2ade8-8ec8-4e4f-adbd-b29d7c542733 331ffb82-6748-4e2b-8ba5-5376cdfe0db0 029a8e8a-15ee-417d-81ee-dc21acdb3591 1276305c-3125-45a7-a405-3dbdda640bb0
+cable-lateral male v2 939dfa9a-555d-4f15-98f0-ff2e035bc37e
+cable-lateral female v2 4ec6f0ef-9751-4d50-adfa-2668a6ff68a7 ; male video v2 ddab7e5e-b29a-4606-8bf1-f762bf6b0163
+# female videos 0 eaa414f8-0ddc-4e67-9266-33232a5cc779 1 a1ea83c1-5275-4b00-bef8-411b16af7d02 3 3554c99e-df04-4091-a292-16057849b93c 4 7da9e011-0975-48b3-afa1-21dbe8a6d191 5 fc78f6d6-a7bc-4a80-b8a1-cc2247ce4643 8 df8ffed7-5837-4488-b984-ef6308ef9abe
+female videos 2 abbba9e2-55b4-4f56-862c-f716339541db 6 4f61b65d-ca25-4b8b-86d1-172ddb3f952a 9 8faea8e3-b09c-4f2f-a6f5-a6860b0a8920
+female rear fly video ad7f90ee ; cable-lateral female v3 still 2cea6113-6b83-45bb-8472-c95c3eb7d132
+female cable-lateral video v3 781d2407-31d0-4b71-ba01-ad315cbc9234
+female cable-lateral video v4 0ddced31-6c5f-48a7-a484-2a265e53871d

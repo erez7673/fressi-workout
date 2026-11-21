@@ -1,0 +1,27 @@
+# batch 6 male stills
+0 db-overhead-ext d9244f6f-65ba-4792-9bb7-70368951531a
+1 skull-crusher 1daaf53e-d66c-45f9-aa79-59ff55460b96
+2 close-grip-smith 4aa410f8-203d-4b8b-ad51-a0058be7b586
+3 assisted-dip 400a1a01-b386-4ce1-901e-955b84c5e825
+4 triceps-machine 29db81f6-78ce-4ee0-b815-a3d0817ac0ab
+5 bench-dip db7e37b7-cfa9-4cdc-a552-03a9500f1d8b
+6 bb-squat 49df4a88-bcfa-42d0-b329-272d693944f0
+7 smith-squat ed52e8c8-cf12-4dc8-a996-1588b8e6c414
+8 goblet-squat a045ae96-8bca-4325-9cc5-3a3fed0f6ae9
+9 sumo-squat 7a770418-41b9-4bbf-abfe-ca172792b32c
+# female stills idx:id
+0:80341c06-58ee-49f6-854f-bacf013b283e 1:e68568bf-406b-4a3b-ab1c-dc2a99682893 3:90c93aad-a7e0-4446-946a-b8ba63e4ee67 4:2e8f1463-4e2b-46a9-96a6-d2b3d67073ac 5:5a9fca08-a593-4dc2-8449-251c0e2e804f 6:053d99ee-004a-4e17-8bc6-6fa933534eea 7:47af14cb-b340-4803-b43f-d2ecf28e6296 8:d69deffa-9b1a-43ed-a146-8aded95b9cc1 9:944095d7-3ebd-49e6-889a-18f2ccd11aa4
+# male videos idx:id
+0:79d9ed0e-96fd-4f96-a8b2-8e7dff66f080 1:981ba2ec-d4b4-4733-8135-1eb32e405710 3:39ffb375-b257-4ec1-9157-b9ee9c1d5bd8 4:62b0aecf-9833-4864-a7ea-1d06bf207357 5:8362e96a-d734-4d99-904b-aae3d97ff306 6:d11841bb-2d33-491b-8750-f3ba25099336 7:31cea7e8-2937-456f-b475-832fe0f55fe4 8:447649fa-2f45-4265-b671-96d25a959afd 9:e109c1b7-d13f-4352-8842-1392044049c1
+close-grip female still a477e6c0-afb3-4888-b7cb-e7080940232d male video 34d55c2e-3f95-4beb-8578-59d0156e0f12
+# female videos 0-9
+d57f96c6-faa3-4332-8adb-111bb33b0034 a5eeaebb-746b-4444-8c3d-b6e62e1ce049 0b21950a-7555-4258-8766-7e3d63f35e66 5723331f-7b22-4559-b3ef-a626d50bd083 770e1e31-a902-421b-b270-136f21fe4acf 12de5710-a39c-43dd-a2aa-5c70929d758c f3796209-4111-4d53-b6c3-dd2a621c0a3d 378f4ee9-10de-4d5f-8dd9-d7bf0e78e4cf 89cd77b8-9a52-4321-b1ef-1a92e8869c6c e6906613-e46c-47ff-80d4-97e556136b9b
+# low-angle options: skull edit 3741cb6d-c4f9-4b3f-a6ee-b6bba32f0379 skull new c92f5e73-0763-444a-8e3a-33c9f9ac5451 cg edit 0c730afb-b9c0-4c84-a3da-585b97030e5c cg new 7f165eba-e52b-4206-ada3-9ce9777c889c
+low female: skull 48ff7469-e7b2-49bd-b6ba-1d0d9f184e4c cg 676e64b9-6ff1-41f8-ad73-69d598e3e33c ; male videos skull 8175d775-6d4b-49e3-b3bb-56f44bdabc3c cg 8c0e91c4-ff76-4c85-8a2c-6232f55b2896
+low female videos skull a7fecf2a-a93b-40b3-b423-28988384fd04 cg f2560ab9-3ff4-4eb7-b257-d1ea6bba51da
+3/4 head-end options: skull R 8e27617b-62cf-46b0-9164-8f76769552e0 skull L 9e528f96-262c-401f-8974-aae12058aa3f cg R c6ba2ecc-6b26-43fa-8c43-036345bbfe54 cg L 9aa1dc3c-2ac0-46a4-bdd4-6440083debcd
+3/4 female skull 47cbd686-b508-433b-8c4a-76415afa8186 cg bc2e0de2-c038-42a1-b26d-e73660bb9e59 ; male videos skull 59806346-0909-4e4b-9faf-a7d50c638683 cg 9659d358-cc59-4443-a4e5-a80491a6317d
+3/4 female videos skull b8f7fc10-cc5f-424d-be91-549281259138 cg d5f5ab25-ff13-45a8-8b7c-4c664d1d5ce3
+bottom stills: skull m 7dd68d21-9062-46dd-93ea-ac6280b8504d f 5223226a-520c-4def-90a4-0c498cffbd8c cg m d57a3d35-7c77-49ef-9515-e5a8fdb2a311 f ecbd2b37-543a-427b-9454-f64ac4084d4d
+half-rep skull videos m d22ecf46-6cf5-4ad5-a83b-bfd98bbce888 f cacaec3c-ccb6-451e-b3e2-af8f3b26b2d6 ; cg bottom retries m 0bca38a8-8439-4107-91e6-cb83f25aa848 e537cf2f-d7a9-4019-aee6-a88f670d366c f 29435ccd-3210-43ea-b58c-09511b35b224 3e58e4e8-c9cf-460d-b867-b279ed56c819
+cg half videos m c4d27c9a-e78e-492a-bf3b-5ca27a64e8d3 f 340ccb49-56d8-4ddd-8fcd-534dff441db3
