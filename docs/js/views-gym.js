@@ -162,9 +162,9 @@ export function gymView() {
   const on = EQUIPMENT.filter(e => eqOn(e.id)).length + state.gym.machines.filter(m => m.on !== false).length;
   const machines = state.gym.machines;
   return {
-    html: `<header class="top"><div><h1>Gym Setup</h1><p class="sub">${on}/${total} items on · switch off what your gym doesn't have</p></div></header>
+    html: `<header class="top"><div><h1>Gym Setup</h1><p class="sub">${on}/${total} items on</p></div></header>
       <button class="btn primary big" data-act="go" data-href="#/identify">${icon.camera} Add a machine with a photo</button>
-      <p class="muted small">Items marked <span class="pill warnpill">confirm</span> weren't visible in the gym photos – tick them on or off next time you're there. The plan only uses items that are on.</p>
+      <p class="muted small">Switch off anything your gym doesn't have. The plan only uses items that are on.</p>
       ${machines.length ? `<h3>My machines</h3><div class="exlist">${machines.map(m => {
         const exs = (m.exerciseIds || []).map(exById).filter(Boolean);
         return `<div class="exrow"><span class="zoomable" data-act="pic-zoom" data-title="${esc(m.name)}">${m.photo ? `<div class="thumb md"><img src="${m.photo}" alt=""></div>` : thumb(exs[0])}</span>
