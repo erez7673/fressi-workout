@@ -24,9 +24,9 @@ Deploy = commit and push to `main`; GitHub Pages is live about 30 s later. On ph
 
 ## Architecture
 
-**Shell and routing (`app.js`).** A hash router (`ROUTES`) maps `#/plan`, `#/day/<week>/<day>`, `#/session`, `#/ex/<id>`, `#/gym`, etc. to view functions. Each view returns `{html, cls?, full?, after?}`; `render()` writes the html into `#view`. `rerender()` re-renders and keeps the scroll position. A 250 ms interval drives all timers by updating elements marked `data-t="elapsed|rest|work|restbar|cardio|live"` in place, without re-rendering.
+**Shell and routing (`app.js`).** A hash router (`ROUTES`) maps `#/plan`, `#/day/<week>/<day>`, `#/session`, `#/ex/<id>`, `#/gym`, `#/onboard[/edit]`, `#/custom`, etc. to view functions. Each view returns `{html, cls?, full?, after?}`; `render()` writes the html into `#view`. `rerender()` re-renders and keeps the scroll position. A 250 ms interval drives all timers by updating elements marked `data-t="elapsed|rest|work|restbar|cardio|live"` in place, without re-rendering.
 
-**Events go through an action registry (`ui.js`).** Markup never contains inline handlers. Use `data-act="name"` for clicks, `data-change="name"` for change events and `data-input="name"` for input events, then `register({ name: (el, e) => … })` in the view module. Pass parameters as `data-*` attributes. Bottom sheets are opened with `sheet(html)` and closed with the `sheet-close` action.
+**Events go through an action registry (`ui.js`).** Markup never contains inline handlers. Use `data-act="name"` for clicks, `data-change="name"` for change events and `data-input="name"` for input events, then `register({ name: (el, e) => … })` in the view module. Pass parameters as `data-*` attributes. Bottom sheets are opened with `sheet(html)` and closed with the `sheet-close` action. Swipe-down to close does not work, so give a sheet a close X in the top-right corner (`closeX` in `views-plan.js`, class `sheet-x`, sticky while the sheet scrolls).
 
 **State (`store.js`).** There is a single `state` object, persisted to localStorage key `fressi.v1`. It holds `profiles` (each with `stats`, `plan`, `history`, `bodyweight`), `gym` (equipment toggles, photographed machines, custom exercises), `settings` and the live `session`. After changing anything:
 - mutate the object;
@@ -44,8 +44,8 @@ Deploy = commit and push to `main`; GitHub Pages is live about 30 s later. On ph
 - `pos`, `grip`, `mot`: used only by the picker.
 
 **Planner (`planner.js`).**
-- `generatePlan` builds a 12-week plan: a split chosen by days per week, `exPerDay(stats)` exercises (the profile's choice, 1–4, default `EX_PER_DAY`) × `SETS = 4` sets, plus warm-up, an optional cardio finisher and a cooldown.
-- **Muscle areas per day.** `AREAS` (legs, glutes, back, chest, …) map to slot patterns. Profile → Edit profile stores the areas for each day in `p.stats.dayAreas`; `areasFor(p, dayIdx)` reads them, `setDayAreas` rebuilds one day, and `applyProfileAreas(p)` reconciles all days at startup and after a sync pull (seeded, so both phones get the same result). `sortDay` orders a day's exercises bigger muscles first (`AREA_ORDER`, compound before isolation); call it after any change to a day's exercise list. `itemArea` gives the area header shown in the day view, and `swapOptions` offers every suitable exercise of the same area.
+- `generatePlan` builds a 12-week plan: a split chosen by days per week (`SPLITS`, 2–`MAX_DAYS` = 7; 6 = Push/Pull/Legs ×2, 7 adds a full-body day), `exPerDay(stats)` exercises (the profile's choice, 1–`MAX_EX_PER_DAY` = 8, default `EX_PER_DAY` = 4) × `SETS = 4` sets, plus warm-up, an optional cardio finisher and a cooldown. With many exercises the session length can't be met: `restScale` bottoms out and the day view shows the real (longer) time.
+- **Muscle areas per day.** `AREAS` (legs, glutes, back, chest, …) map to slot patterns. Profile → Build your custom plan stores the areas for each day in `p.stats.dayAreas`; `areasFor(p, dayIdx)` reads them, `setDayAreas` rebuilds one day, and `applyProfileAreas(p)` reconciles all days at startup and after a sync pull (seeded, so both phones get the same result). `sortDay` orders a day's exercises bigger muscles first (`AREA_ORDER`, compound before isolation); call it after any change to a day's exercise list. `itemsForAreas` takes one exercise from each area in turn and starts the area lists over when they run out (for up to 8 a day), stopping when nothing new fits. `itemArea` gives the area header shown in the day view, and `swapOptions` offers every suitable exercise of the same area.
 - `restScale` shortens rests (minimum 45 s) so the longest day fits the session length.
 - `prescribe` sets reps and rest by goal and phase: base, build (more reps), peak (heavier), and a deload in week 12.
 - `suggest` does progressive overload from the last log. When an exercise has no log yet, it uses `p.startKg[exId]`, falling back to a body-weight estimate.
@@ -56,9 +56,9 @@ Deploy = commit and push to `main`; GitHub Pages is live about 30 s later. On ph
 **Workout runtime (`workout.js`).** Holds the session state machine: set and rest timers stored as timestamps (so they survive a locked screen), beeps through Web Audio (no vibration, by design) and the screen wake lock.
 
 **Views.**
-- `views-plan.js`: plan, day preview with the set editor, session, summary.
+- `views-plan.js`: plan, day preview with the set editor, session, summary. In the day preview the warm-up machine (`warm-open`, profile-wide `p.warm`) and the cardio finisher (`cardio-open`, per day: `plan.days[d].cardio = {exId, min}`, all weeks; `min: 0` = left out, `buildSession` skips it) each have a Change sheet; both also update an open workout whose timer hasn't started. The mobility routine is a button that opens the moves in a sheet (`mobility-open`).
 - `views-gym.js`: exercise library, exercise page, Gym Setup, identify.
-- `views-me.js`: onboarding, profile, progress (charts in `charts.js`).
+- `views-me.js`: profile forms, profile, progress (charts in `charts.js`). `profileForm(mode)` builds three forms: `new` (onboarding: everything except muscle areas), `edit` (`#/onboard/edit`: name to training days per week) and `custom` (`#/custom`, "Build your custom plan": exercises per day, muscle areas per day, session length, warm-up, cardio, injuries, extra focus). `readForm` only reads the fields present, so each screen changes only its own part of `p.stats`.
 - `views-timer.js`: the stand-alone Timer tab (`#/timer`): countdown and stopwatch kept in `state.timer` as timestamps (not synced). `timerTick()` runs from the app's 250 ms loop and updates `data-t="tsw|tcd"`.
 
 **Exercise animations (`anim.js`).** Shown under "How to do it" on the exercise page; `hasAnim(id)` decides whether the page shows an animation (written steps then go into a collapsed "Written steps" box).

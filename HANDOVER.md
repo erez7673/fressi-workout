@@ -2,7 +2,7 @@
 
 Read this together with `CLAUDE.md` (the "Exercise animations" section holds the full rules). This file records where the work stands and every approved Higgsfield still, so a new chat can continue without redoing anything.
 
-_Last updated 2026-11-21, after batch 9._
+_Last updated 2026-11-21, after batch 9 and the app changes in `ddd4158`._
 
 ## Where things stand
 
@@ -13,6 +13,24 @@ _Last updated 2026-11-21, after batch 9._
 - **Credits: 0.66 left. Nothing can be generated until the monthly refill.** Images cost 0.25. A seedance video costs 2–2.5. Batch 9 used about 65 credits. Batch 10 should need about 30.
 - **Always check the balance BEFORE sending a batch,** never in the same step.
 - **Workflow with the user:** generate 10 exercises per batch, then send a review video and wait. When the user answers "Yes, push and continue", commit and push, then start the next batch. Never push without that answer.
+
+## App changes since the clip work paused (2026-11-21, commit `ddd4158`, pushed)
+
+The details are in `CLAUDE.md`.
+
+- **Workout day view:**
+  - The cardio finisher has a Change sheet, like the warm-up. It holds the machine and the minutes, and applies to that day in every week; 0 minutes leaves the finisher out.
+  - The quick mobility routine is a button that opens the moves in a pop-up.
+  - The exercise ⋯ sheet (swap list) has a close X. Swipe-down to close still doesn't work, and the user asked not to fix it.
+- **Profile tab:**
+  - **New "Build your custom plan" screen** (`#/custom`): exercises per day, muscle areas per day, session length, warm-up, cardio, injuries and extra focus.
+  - **Edit profile** now ends at "Training days per week", which goes up to 7.
+  - The new-profile form keeps everything except the muscle areas.
+- **Planner:**
+  - Up to 8 exercises per day, with new 6- and 7-day splits.
+  - Muscle-area lists start over when they run out, so a day can reach 8 exercises.
+
+These changes don't affect the clips. If a future change adds a JS or CSS file, add it to `FILES` in `sw.js`.
 
 ## Still to do next month (7 exercises, cardio excluded)
 
