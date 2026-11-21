@@ -30,6 +30,9 @@ export const icon = {
   sync: P('<path d="M21 12a9 9 0 0 1-15 6.7L3 16M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M3 21v-5h5"/>'),
   trash: P('<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>'),
   edit: P('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>'),
+  move: P('<path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"/>'),
+  up: P('<path d="M12 19V5M6 11l6-6 6 6"/>', 'stroke-width="2.5"'),
+  down: P('<path d="M12 5v14M6 13l6 6 6-6"/>', 'stroke-width="2.5"'),
   search: P('<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>'),
 };
 

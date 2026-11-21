@@ -7,7 +7,18 @@ export const EX_PER_DAY = 4;   // default exercises per workout day (not countin
 export const MAX_EX_PER_DAY = 8;
 export const exPerDay = (st) => Math.max(1, Math.min(MAX_EX_PER_DAY, st?.exPerDay || EX_PER_DAY)); // the profile's choice, 1–8
 // Exercises per day for this profile's plan: ready-made plans have their own number (see TEMPLATES).
-export const dayCap = (p) => TEMPLATES[p.plan?.template]?.perDay || exPerDay(p.stats);
+// Exercises per workout day. A ready-made plan uses its own number, raised when the user adds extra exercises (plan.cap).
+export const dayCap = (p) => {
+  const tpl = TEMPLATES[p.plan?.template];
+  return tpl ? Math.min(MAX_EX_PER_DAY, Math.max(tpl.perDay, p.plan.cap || 0)) : exPerDay(p.stats);
+};
+// Raises the number of exercises per day to n (max MAX_EX_PER_DAY), for a ready-made or a custom plan.
+export function raiseDayCap(p, n) {
+  n = Math.min(MAX_EX_PER_DAY, n);
+  if (n <= dayCap(p)) return;
+  if (TEMPLATES[p.plan?.template]) p.plan.cap = n;
+  else p.stats.exPerDay = n;
+}
 export const SETS = 4;         // sets per exercise
 const PLAN_FMT = 3;            // bump when the plan shape changes (see upgradePlan)
 
@@ -46,7 +57,9 @@ export function itemArea(day, it) {
 }
 
 // Puts a day's exercises in training order: bigger muscle areas first, and within an area compound lifts first.
+// A day the user has put in their own order (day.manual) is left as it is.
 export function sortDay(day) {
+  if (day.manual) return false;
   const rank = (it) => {
     const a = AREA_ORDER.indexOf(itemArea(day, it));
     return (a < 0 ? 99 : a) * 2 + (exById(it.exId)?.iso ? 1 : 0);
@@ -352,6 +365,7 @@ export function setDayAreas(p, dayIdx, areas, seed = Date.now()) {
   } else {
     delete day.muscles;
   }
+  delete day.manual; // new exercises: back to the app's order
   fitDay(p, dayIdx);
   sortDay(day);
 }

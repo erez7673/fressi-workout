@@ -7,7 +7,7 @@ import { POSITIONS, GRIPS, FEEL, matchExercises, customExercise, identifyWithAI 
 import { lineChart } from './charts.js';
 import { EQUIP_PIC } from './pictures.js';
 import { hasAnim, animHTML, startAnims } from './anim.js';
-import { generatePlan, dayFocus, sessionBudget, warmPref, dayCap, sortDay } from './planner.js';
+import { generatePlan, dayFocus, sessionBudget, warmPref, dayCap, sortDay, raiseDayCap, MAX_EX_PER_DAY } from './planner.js';
 import { rerender } from './app.js';
 import { scheduleSync } from './sync.js';
 
@@ -108,7 +108,7 @@ function addToDaySheet(ex) {
       const has = cardio ? day.cardio?.exId === ex.id : day.items.some(it => it.exId === ex.id);
       const full = !cardio && day.items.length >= dayCap(p);
       return `<button class="row" data-act="add-to-day-pick" data-id="${ex.id}" data-d="${d}" ${has ? 'disabled' : ''}>
-        <span><b>${esc(day.name)}</b><small>${esc(dayFocus(day))}${full && !has ? ` · full (${day.items.length} of ${dayCap(p)}) – tap to replace one` : ''}</small></span>${has ? '<span class="pill">Already in it</span>' : full ? icon.swap : icon.plus}</button>`;
+        <span><b>${esc(day.name)}</b><small>${esc(dayFocus(day))}${full && !has ? ` · has ${day.items.length} – tap to add or swap` : ''}</small></span>${has ? '<span class="pill">Already in it</span>' : full ? icon.swap : icon.plus}</button>`;
     }).join('')}
     ${cardio ? `<button class="row" data-act="add-to-warm" data-id="${ex.id}"><span><b>Use as my warm-up</b><small>All workout days</small></span>${icon.plus}</button>` : ''}
     <button class="btn ghost" data-act="sheet-close">Cancel</button>`);
@@ -122,9 +122,13 @@ register({
       day.cardio = { exId: ex.id, min: day.cardio?.min || sessionBudget(p.stats).cardio || 10 };
       toast(`Cardio finisher of ${day.name}`);
     } else if (day.items.length >= dayCap(p)) {
-      // The day already has the number of exercises set in the profile: choose one to replace.
-      sheet(`<h2>${esc(day.name)} is full</h2>
-        <p class="muted small">It has ${day.items.length} of ${dayCap(p)} exercises (set under Profile → Build your custom plan). Replace one with ${esc(ex.name)}:</p>
+      // The day already has the number of exercises set in the profile: add it as an extra one, or replace one.
+      const n = day.items.length + 1;
+      sheet(`<h2>Add or swap</h2>
+        <p class="muted small">${esc(day.name)} has ${day.items.length} exercises.</p>
+        ${n <= MAX_EX_PER_DAY ? `<button class="row" data-act="add-to-day-extra" data-id="${ex.id}" data-d="${el.dataset.d}">${icon.plus}<span><b>Add ${esc(ex.name)}</b><small>${esc(day.name)} gets ${n} exercises${dayCap(p) < n ? `, and you can have up to ${n} on every workout day` : ''}</small></span></button>`
+          : `<p class="muted small">${MAX_EX_PER_DAY} exercises is the most a day can have.</p>`}
+        <h3>Or swap it for</h3>
         ${day.items.map((it, i) => { const o = exById(it.exId); return o ? `<button class="row" data-act="add-to-day-replace" data-id="${ex.id}" data-d="${el.dataset.d}" data-i="${i}">${thumb(o, photoFor(o.id), 'sm')}<span><b>${esc(o.name)}</b><small>${esc(MUSCLES[o.m])}</small></span>${icon.swap}</button>` : ''; }).join('')}
         <button class="btn ghost" data-act="sheet-close">Cancel</button>`);
       return;
@@ -134,6 +138,15 @@ register({
       toast(`Added to ${day.name} (${day.items.length} of ${dayCap(p)})`);
     }
     touchProfile(p); scheduleSync(); closeSheet(); rerender();
+  },
+  'add-to-day-extra': (el) => {
+    const p = profile(); const ex = exById(el.dataset.id); const day = p.plan.days[+el.dataset.d];
+    if (day.items.some(it => it.exId === ex.id) || day.items.length >= MAX_EX_PER_DAY) return;
+    day.items.push({ exId: ex.id, pat: ex.pat });
+    raiseDayCap(p, day.items.length);
+    sortDay(day);
+    touchProfile(p); scheduleSync(); closeSheet(); rerender();
+    toast(`Added to ${day.name} (${day.items.length} exercises)`);
   },
   'add-to-day-replace': (el) => {
     const p = profile(); const ex = exById(el.dataset.id); const day = p.plan.days[+el.dataset.d];

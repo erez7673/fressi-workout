@@ -114,6 +114,21 @@ register({
 // ───────────── Day preview ─────────────
 let preview = null;
 
+// Move sheet: the day's exercises in order, the chosen one highlighted, with Move up / Move down.
+function openMoveSheet(d, i) {
+  const p = profile(); const day = p.plan.days[d];
+  const n = day.items.length;
+  sheet(`${closeX}<h2>Change the order</h2>
+    <p class="muted small">${esc(day.name)} · for all weeks</p>
+    <ol class="movelist">${day.items.map((it, k) => `<li class="${k === i ? 'on' : ''}">${esc(exById(it.exId)?.name || it.exId)}</li>`).join('')}</ol>
+    <div class="btnrow">
+      <button class="btn" data-act="move-step" data-d="${d}" data-i="${i}" data-by="-1" ${i === 0 ? 'disabled' : ''}>${icon.up} Move up</button>
+      <button class="btn" data-act="move-step" data-d="${d}" data-i="${i}" data-by="1" ${i === n - 1 ? 'disabled' : ''}>${icon.down} Move down</button>
+    </div>
+    ${day.manual ? `<button class="btn ghost" data-act="move-auto" data-d="${d}" data-i="${i}">Back to the app's order (bigger muscles first)</button>` : ''}
+    <button class="btn primary" data-act="sheet-close">Done</button>`);
+}
+
 export function dayView(w, d) {
   const p = profile();
   const plan = p.plan;
@@ -139,6 +154,7 @@ export function dayView(w, d) {
         <button class="chips editable" data-act="edit-sets" data-w="${w}" data-d="${d}" data-i="${i}" aria-label="Edit reps and weight">${it.sets.map(s => `<span class="chip">${setLabel(s, it.unit)}</span>`).join('')}<span class="chip edit">${icon.edit} Edit</span></button>
         ${!avail ? '<em class="warn">Equipment marked as not available – swap it</em>' : it.note ? `<small class="note">${esc(it.note)}</small>` : ''}
       </div>
+      ${preview.items.length > 1 ? `<button class="iconbtn" data-act="move-open" data-d="${d}" data-i="${i}" aria-label="Move up or down">${icon.move}</button>` : ''}
       <button class="iconbtn" data-act="ex-menu" data-d="${d}" data-i="${i}" aria-label="Options">${icon.dots}</button>
     </div>
     <div class="rest">Rest: ${it.rest} s</div>`;
@@ -328,6 +344,21 @@ register({
       <h3>Swap for another ${esc(area)} exercise <small class="muted">(${opts.length})</small></h3>
       ${opts.length ? opts.map(o => `<button class="row" data-act="swap" data-d="${d}" data-i="${i}" data-ex="${o.id}">${thumb(o, photoFor(o.id), 'sm')}<span><b>${esc(o.name)}</b><small>${esc(MUSCLES[o.m])}</small></span></button>`).join('') : '<p class="muted">No alternatives with your current gym setup.</p>'}
       <button class="row danger" data-act="remove-ex" data-d="${d}" data-i="${i}">${icon.trash}<b>Remove from this day</b></button>`);
+  },
+  'move-open': (el) => openMoveSheet(+el.dataset.d, +el.dataset.i),
+  'move-step': (el) => {
+    const p = profile(); const d = +el.dataset.d, i = +el.dataset.i, j = i + +el.dataset.by;
+    const day = p.plan.days[d];
+    if (j < 0 || j >= day.items.length) return;
+    [day.items[i], day.items[j]] = [day.items[j], day.items[i]];
+    day.manual = true;
+    touchProfile(p); scheduleSync(); rerender(); openMoveSheet(d, j);
+  },
+  'move-auto': (el) => {
+    const p = profile(); const d = +el.dataset.d; const day = p.plan.days[d];
+    const id = day.items[+el.dataset.i]?.exId;
+    delete day.manual; sortDay(day);
+    touchProfile(p); scheduleSync(); rerender(); openMoveSheet(d, Math.max(0, day.items.findIndex(x => x.exId === id)));
   },
   'edit-sets': (el) => openSetEditor(+el.dataset.w, +el.dataset.d, +el.dataset.i),
   'pv-set': (el) => {
